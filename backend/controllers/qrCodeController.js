@@ -250,8 +250,8 @@ const scanDailyAttendanceExternal = async (req, res) => {
       });
     }
 
-    // Use the intern's MongoDB _id for the internal system
-    const result = await qrCodeService.markDailyAttendanceQR(qrSessionId, intern._id.toString());
+    // Use the intern's MongoDB _id for the external system sync
+    const result = await qrCodeService.markExternalDailyAttendance(intern._id.toString(), qrSessionId);
     
     res.status(200).json({
       success: true,
