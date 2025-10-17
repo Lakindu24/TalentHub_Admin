@@ -13,6 +13,7 @@ const internSchema = new mongoose.Schema({
   traineeId: { type: String, required: true, unique: true },
   traineeName: { type: String, required: true },
   fieldOfSpecialization: { type: String, required: true },
+  homeAddress: { type: String, default: "" },
   trainingStartDate: { type: Date },
   trainingEndDate: { type: Date },  
   institute: { type: String, default: "" },  

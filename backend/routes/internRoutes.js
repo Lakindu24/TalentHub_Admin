@@ -5,6 +5,8 @@ const {
   addIntern,
   addExternalIntern,
   getAllInterns,
+  getActiveInternsExternal,
+  syncActiveInterns,
   getInternById,
   getInternByIdEach,              // ← from v2
   updateIntern,
@@ -55,6 +57,9 @@ router.get("/weekly-attendance-stats", authenticateUser, getWeeklyAttendanceStat
 router.post("/add", authenticateUser, addIntern);
 router.post("/add-external", addExternalIntern);
 router.get("/", authenticateUser, getAllInterns);
+// External trainees API
+router.get("/external/active", authenticateUser, getActiveInternsExternal);
+router.post("/external/sync", authenticateUser, syncActiveInterns);
 router.get("/page/:id", getInternByIdEach);           // ← insertion from v2
 router.get("/:id", authenticateUser, getInternById);
 router.put("/update/:id", authenticateUser, updateIntern);

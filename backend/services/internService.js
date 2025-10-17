@@ -1,5 +1,7 @@
 const InternRepository = require("../repositories/internRepository");
 const moment = require("moment");
+const traineesApiService = require("./traineesApiService");
+const config = require("../config/dotenv");
 
 class InternService {
   async addIntern(data) {
@@ -8,7 +10,13 @@ class InternService {
 
   // Update the getAllInterns method
   async getAllInterns(date) {
-    let interns = await InternRepository.getAllInterns();
+    // Feature toggle: if mode is 'external', fetch from API instead of DB
+    let interns;
+    if (config.traineesApi.mode === 'external') {
+      interns = await this.getActiveInternsFromExternal();
+    } else {
+      interns = await InternRepository.getAllInterns();
+    }
 
     if (date) {
       const formattedDate = moment.tz(date, "Asia/Colombo").startOf('day').toDate();
@@ -33,6 +41,47 @@ class InternService {
 
   async getInternById(internId) {
     return await InternRepository.getInternById(internId);
+  }
+
+  /**
+   * Fetch active interns from external API (not from MongoDB).
+   */
+  async getActiveInternsFromExternal() {
+    return await traineesApiService.fetchAllActive();
+  }
+
+  /**
+   * Synchronize external active interns into MongoDB (upsert by traineeId).
+   */
+  async syncActiveInterns() {
+    const externalInterns = await traineesApiService.fetchAllActive();
+    const results = { created: 0, updated: 0, skipped: 0, errors: 0 };
+
+    for (const ext of externalInterns) {
+      try {
+        // Try find existing by traineeId
+        const existing = await InternRepository.findByTraineeId(ext.traineeId);
+        if (existing) {
+          // Update selective fields; do not overwrite attendance or team unless provided
+          existing.traineeName = ext.traineeName || existing.traineeName;
+          existing.fieldOfSpecialization = ext.fieldOfSpecialization || existing.fieldOfSpecialization;
+          existing.trainingStartDate = ext.trainingStartDate || existing.trainingStartDate;
+          existing.trainingEndDate = ext.trainingEndDate || existing.trainingEndDate;
+          existing.institute = ext.institute ?? existing.institute;
+          existing.homeAddress = ext.homeAddress ?? existing.homeAddress;
+          existing.email = ext.email ?? existing.email;
+          await existing.save({ validateBeforeSave: false });
+          results.updated++;
+        } else {
+          await InternRepository.addIntern(ext);
+          results.created++;
+        }
+      } catch (e) {
+        results.errors++;
+      }
+    }
+
+    return { ...results, totalExternal: externalInterns.length };
   }
 
   async getAttendanceStats() {

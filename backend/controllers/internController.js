@@ -39,6 +39,26 @@ const getAllInterns = async (req, res) => {
   }
 };
 
+// GET active interns directly from external API (without DB persistence)
+const getActiveInternsExternal = async (req, res) => {
+  try {
+    const interns = await InternService.getActiveInternsFromExternal();
+    res.status(200).json(interns);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching interns from external API", error: error.message });
+  }
+};
+
+// POST sync external interns into local DB (upsert)
+const syncActiveInterns = async (req, res) => {
+  try {
+    const result = await InternService.syncActiveInterns();
+    res.status(200).json({ message: "Sync complete", ...result });
+  } catch (error) {
+    res.status(500).json({ message: "Error syncing interns from external API", error: error.message });
+  }
+};
+
 
 const getInternById = async (req, res) => {
   try {
@@ -501,6 +521,8 @@ module.exports = {
   addIntern,
   addExternalIntern,
   getAllInterns,
+  getActiveInternsExternal,
+  syncActiveInterns,
   getInternById,
   getAttendanceStats,
   markAttendance,
