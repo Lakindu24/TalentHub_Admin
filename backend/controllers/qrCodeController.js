@@ -240,25 +240,18 @@ const scanDailyAttendanceExternal = async (req, res) => {
       });
     }
 
-    // Find intern by traineeId, create if doesn't exist
-    let intern = await InternRepository.findByTraineeId(traineeId);
+    // Find intern by traineeId
+    const intern = await InternRepository.findByTraineeId(traineeId);
     if (!intern) {
-      // Create a basic intern record for external sync
-      // In a production system, you'd fetch more details from TalentHub API
-      console.log(`Creating new intern record for traineeId: ${traineeId}`);
-      const newInternData = {
-        traineeId: traineeId,
-        traineeName: `External Trainee ${traineeId}`, // Placeholder name
-        email: `trainee_${traineeId}@external.com`, // Placeholder email
-        attendance: []
-      };
-      intern = await InternRepository.addIntern(newInternData);
-      console.log(`Created intern record: ${intern._id}`);
+      return res.status(404).json({
+        success: false,
+        message: "Trainee not found in the system",
+        code: "TRAINEE_NOT_FOUND"
+      });
     }
 
-    // For external calls, mark daily attendance directly without QR validation
-    // since TalentHub has its own QR validation system
-    const result = await qrCodeService.markExternalDailyAttendance(intern._id.toString(), qrSessionId);
+    // Use the intern's MongoDB _id for the internal system
+    const result = await qrCodeService.markDailyAttendanceQR(qrSessionId, intern._id.toString());
     
     res.status(200).json({
       success: true,
@@ -388,73 +381,6 @@ const verifyQRStatus = async (req, res) => {
   }
 };
 
-// External API for TalentHub system - Meeting attendance
-const scanMeetingExternal = async (req, res) => {
-  const { qrSessionId, traineeId } = req.body;
-
-  try {
-    // Validate input
-    if (!qrSessionId || !traineeId) {
-      return res.status(400).json({
-        success: false,
-        message: "QR Session ID and Trainee ID are required",
-        code: "MISSING_PARAMS"
-      });
-    }
-
-    // Find intern by traineeId, create if doesn't exist
-    let intern = await InternRepository.findByTraineeId(traineeId);
-    if (!intern) {
-      // Create a basic intern record for external sync
-      // In a production system, you'd fetch more details from TalentHub API
-      console.log(`Creating new intern record for traineeId: ${traineeId}`);
-      const newInternData = {
-        traineeId: traineeId,
-        traineeName: `External Trainee ${traineeId}`, // Placeholder name
-        email: `trainee_${traineeId}@external.com`, // Placeholder email
-        attendance: []
-      };
-      intern = await InternRepository.addIntern(newInternData);
-      console.log(`Created intern record: ${intern._id}`);
-    }
-
-    // For external calls, mark meeting attendance directly without QR validation
-    // since TalentHub has its own QR validation system
-    const result = await qrCodeService.markExternalMeetingAttendance(intern._id.toString(), qrSessionId);
-    
-    res.status(200).json({
-      success: true,
-      message: "Meeting attendance marked successfully",
-      data: {
-        traineeId: result.intern.traineeId,
-        traineeName: result.intern.traineeName,
-        timeMarked: result.timeMarked,
-        date: new Date().toDateString()
-      }
-    });
-
-  } catch (error) {
-    console.error("Error in external meeting QR scan:", error);
-    
-    let statusCode = 500;
-    let errorCode = "INTERNAL_ERROR";
-    
-    if (error.message.includes("not found") || error.message.includes("expired")) {
-      statusCode = 400;
-      errorCode = "QR_EXPIRED";
-    } else if (error.message.includes("already marked")) {
-      statusCode = 409;
-      errorCode = "ALREADY_MARKED";
-    }
-    
-    res.status(statusCode).json({
-      success: false,
-      message: error.message,
-      code: errorCode
-    });
-  }
-};
-
 module.exports = { 
   generateQRCode, 
   markAttendance, 
@@ -466,6 +392,5 @@ module.exports = {
   getCurrentQRInfo,
   getCurrentMeetingQRInfo,
   scanDailyAttendanceExternal,
-  scanMeetingExternal,
   verifyQRStatus
 };
