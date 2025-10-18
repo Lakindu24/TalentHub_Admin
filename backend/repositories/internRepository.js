@@ -292,7 +292,7 @@ class InternRepository {
         if (dailyAttendance) {
           hasRelevantAttendance = true;
           attendanceInfo = {
-            type: 'Daily QR',
+            type: 'Daily',
             time: dailyAttendance.timeMarked || dailyAttendance.date,
             method: dailyAttendance.markedBy === 'external_system' ? 'QR Code Scan' : 'Manual Entry'
           };
@@ -305,39 +305,52 @@ class InternRepository {
         if (meetingAttendance) {
           hasRelevantAttendance = true;
           attendanceInfo = {
-            type: meetingAttendance.type === 'manual' ? 'Manual' : 'Meeting QR',
+            type: meetingAttendance.type === 'manual' ? 'Manual' : 'Meeting',
             time: meetingAttendance.timeMarked || meetingAttendance.date,
             method: meetingAttendance.markedBy === 'external_system' ? 'QR Code Scan' : 'Manual Entry'
           };
         }
       } else {
-        // Return all attendance types - but prioritize daily QR over meeting attendance
+        // Return all applicable attendance types for "All" view:
+        // - Always include Daily if present
+        // - Include Meeting ONLY if Daily is also present
         const presentAttendance = todayAttendance.filter(entry => entry.status === 'Present');
-        if (presentAttendance.length > 0) {
+        const infoList = [];
+
+        const dailyAttendance = presentAttendance.find(entry => entry.type === 'daily_qr');
+        const meetingQRAttendance = presentAttendance.find(entry => entry.type === 'qr');
+        const manualAttendance = presentAttendance.find(entry => entry.type === 'manual');
+
+        // Add Daily if present
+        if (dailyAttendance) {
+          infoList.push({
+            type: 'Daily',
+            time: dailyAttendance.timeMarked || dailyAttendance.date,
+            method: dailyAttendance.markedBy === 'external_system' ? 'QR Code Scan' : 'Manual Entry'
+          });
+        }
+
+        // Add Meeting (QR) only when Daily is present
+        if (dailyAttendance && meetingQRAttendance) {
+          infoList.push({
+            type: 'Meeting',
+            time: meetingQRAttendance.timeMarked || meetingQRAttendance.date,
+            method: meetingQRAttendance.markedBy === 'external_system' ? 'QR Code Scan' : 'Manual Entry'
+          });
+        }
+
+        // Always include Manual if present, as a separate type
+        if (manualAttendance) {
+          infoList.push({
+            type: 'Manual',
+            time: manualAttendance.timeMarked || manualAttendance.date,
+            method: manualAttendance.markedBy === 'external_system' ? 'QR Code Scan' : 'Manual Entry'
+          });
+        }
+
+        if (infoList.length > 0) {
           hasRelevantAttendance = true;
-          
-          // Check if there's daily attendance - if so, only show daily
-          const dailyAttendance = presentAttendance.find(entry => entry.type === 'daily_qr');
-          if (dailyAttendance) {
-            // Only show daily attendance
-            attendanceInfo = {
-              type: 'Daily QR',
-              time: dailyAttendance.timeMarked || dailyAttendance.date,
-              method: dailyAttendance.markedBy === 'external_system' ? 'QR Code Scan' : 'Manual Entry'
-            };
-          } else {
-            // No daily attendance, show meeting attendance (manual or qr)
-            const meetingAttendance = presentAttendance.find(entry => 
-              entry.type === 'manual' || entry.type === 'qr'
-            );
-            if (meetingAttendance) {
-              attendanceInfo = {
-                type: meetingAttendance.type === 'manual' ? 'Manual' : 'Meeting QR',
-                time: meetingAttendance.timeMarked || meetingAttendance.date,
-                method: meetingAttendance.markedBy === 'external_system' ? 'QR Code Scan' : 'Manual Entry'
-              };
-            }
-          }
+          attendanceInfo = infoList;
         }
       }
 
