@@ -244,16 +244,14 @@ class InternRepository {
         stats.dailyAttendance.absent++;
       }
 
-      // Check for meeting attendance (manual or qr type) - BUT ONLY if no daily attendance exists
-      if (!dailyAttendance) {
-        const meetingAttendance = todayAttendance.find(entry => 
-          entry.type === 'manual' || entry.type === 'qr'
-        );
-        if (meetingAttendance && meetingAttendance.status === "Present") {
-          stats.meetingAttendance.present++;
-        } else if (meetingAttendance && meetingAttendance.status === "Absent") {
-          stats.meetingAttendance.absent++;
-        }
+      // Check for meeting attendance (qr or manual type)
+      const meetingAttendance = todayAttendance.find(entry => 
+        (entry.type === 'qr' || entry.type === 'manual')
+      );
+      if (meetingAttendance && meetingAttendance.status === "Present") {
+        stats.meetingAttendance.present++;
+      } else if (meetingAttendance && meetingAttendance.status === "Absent") {
+        stats.meetingAttendance.absent++;
       }
 
       // Total stats (any attendance type)
@@ -300,20 +298,17 @@ class InternRepository {
           };
         }
       } else if (attendanceType === 'meeting') {
-        // Only show meeting attendance if NO daily attendance exists (prioritize daily QR)
-        const dailyAttendance = todayAttendance.find(entry => entry.type === 'daily_qr');
-        if (!dailyAttendance) {
-          const meetingAttendance = todayAttendance.find(entry => 
-            (entry.type === 'manual' || entry.type === 'qr') && entry.status === 'Present'
-          );
-          if (meetingAttendance) {
-            hasRelevantAttendance = true;
-            attendanceInfo = {
-              type: meetingAttendance.type === 'manual' ? 'Manual' : 'Meeting QR',
-              time: meetingAttendance.timeMarked || meetingAttendance.date,
-              method: meetingAttendance.markedBy === 'external_system' ? 'QR Code Scan' : 'Manual Entry'
-            };
-          }
+        // Show meeting attendance independently of daily (type 'qr' or 'manual')
+        const meetingAttendance = todayAttendance.find(entry => 
+          (entry.type === 'qr' || entry.type === 'manual') && entry.status === 'Present'
+        );
+        if (meetingAttendance) {
+          hasRelevantAttendance = true;
+          attendanceInfo = {
+            type: meetingAttendance.type === 'manual' ? 'Manual' : 'Meeting QR',
+            time: meetingAttendance.timeMarked || meetingAttendance.date,
+            method: meetingAttendance.markedBy === 'external_system' ? 'QR Code Scan' : 'Manual Entry'
+          };
         }
       } else {
         // Return all attendance types - but prioritize daily QR over meeting attendance
@@ -331,7 +326,7 @@ class InternRepository {
               method: dailyAttendance.markedBy === 'external_system' ? 'QR Code Scan' : 'Manual Entry'
             };
           } else {
-            // No daily attendance, show meeting attendance
+            // No daily attendance, show meeting attendance (manual or qr)
             const meetingAttendance = presentAttendance.find(entry => 
               entry.type === 'manual' || entry.type === 'qr'
             );

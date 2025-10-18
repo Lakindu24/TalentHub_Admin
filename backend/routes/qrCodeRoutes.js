@@ -11,6 +11,7 @@ const {
   getCurrentQRInfo,
   getCurrentMeetingQRInfo,
   scanDailyAttendanceExternal,
+  scanMeetingAttendanceExternal,
   verifyQRStatus
 } = require("../controllers/qrCodeController");
 const { 
@@ -39,6 +40,7 @@ router.get("/current-meeting-qr-info", getCurrentMeetingQRInfo);
 
 // External API for TalentHub system
 router.post("/external/scan-daily", scanDailyAttendanceExternal);
+router.post("/external/scan-meeting", scanMeetingAttendanceExternal);
 
 // Cross-application QR sharing endpoints
 router.get("/external/current-qr", getCurrentQRInfo);

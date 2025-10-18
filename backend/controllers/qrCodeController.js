@@ -340,6 +340,66 @@ const getCurrentMeetingQRInfo = async (req, res) => {
   }
 };
 
+// External API for TalentHub system to scan Meeting QR codes
+const scanMeetingAttendanceExternal = async (req, res) => {
+  const { qrSessionId, qrContent, traineeId } = req.body;
+
+  try {
+    // Validate input
+    const qrData = qrSessionId || qrContent;
+    if (!qrData || !traineeId) {
+      return res.status(400).json({
+        success: false,
+        message: "QR Session ID/Content and Trainee ID are required",
+        code: "MISSING_PARAMS"
+      });
+    }
+
+    // Find intern by traineeId
+    const intern = await InternRepository.findByTraineeId(traineeId);
+    if (!intern) {
+      return res.status(404).json({
+        success: false,
+        message: "Trainee not found in the system",
+        code: "TRAINEE_NOT_FOUND"
+      });
+    }
+
+    // Mark meeting attendance as coming from an external system
+    const result = await qrCodeService.markExternalMeetingAttendance(intern._id.toString(), qrData);
+
+    return res.status(200).json({
+      success: true,
+      message: "Meeting attendance marked successfully",
+      data: {
+        traineeId: result.intern.traineeId,
+        traineeName: result.intern.traineeName,
+        timeMarked: result.timeMarked,
+        date: new Date().toDateString()
+      }
+    });
+  } catch (error) {
+    console.error("Error in external Meeting QR scan:", error);
+
+    let statusCode = 500;
+    let errorCode = "INTERNAL_ERROR";
+
+    if (error.message && (error.message.includes("not found") || error.message.includes("expired"))) {
+      statusCode = 400;
+      errorCode = "QR_EXPIRED";
+    } else if (error.message && error.message.includes("already marked")) {
+      statusCode = 409;
+      errorCode = "ALREADY_MARKED";
+    }
+
+    return res.status(statusCode).json({
+      success: false,
+      message: error.message,
+      code: errorCode
+    });
+  }
+};
+
 // Verify QR status for external applications
 const verifyQRStatus = async (req, res) => {
   const { sessionId } = req.params;
@@ -392,5 +452,6 @@ module.exports = {
   getCurrentQRInfo,
   getCurrentMeetingQRInfo,
   scanDailyAttendanceExternal,
+  scanMeetingAttendanceExternal,
   verifyQRStatus
 };

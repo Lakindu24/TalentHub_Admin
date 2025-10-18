@@ -74,7 +74,7 @@ const QRGeneratorPage = () => {
               const attDate = new Date(a.date).toDateString();
               const isToday = attDate === today;
               const isPresent = a.status === "Present";
-              const isQRType = (a.type === "qr" || a.type === "daily_qr");
+              const isQRType = (a.type === "qr");
               
               // Debug logging
               if (isToday && isPresent) {
@@ -87,12 +87,12 @@ const QRGeneratorPage = () => {
           return hasQRAttendance;
         })
         .map((i) => {
-          // Find ALL today's QR attendance records to handle multiple entries
+          // Find ALL today's MEETING QR attendance records to handle multiple entries
           const todayAttendances = i.attendance.filter(
             (a) =>
               new Date(a.date).toDateString() === today &&
               a.status === "Present" &&
-              (a.type === "qr" || a.type === "daily_qr")
+              (a.type === "qr")
           );
           
           console.log(`Mapping intern ${i.traineeId}, found ${todayAttendances.length} attendance records:`, todayAttendances);
@@ -225,7 +225,7 @@ const QRGeneratorPage = () => {
             <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
               <div className="flex items-center justify-between">
                 <h3 className="text-gray-500 text-sm font-medium">
-                  Total Attendance Today
+                  Total Meeting Scans Today
                 </h3>
                 <span className="p-2 bg-blue-50 rounded-lg">
                   <User className="h-5 w-5 text-blue-500" />
@@ -396,10 +396,10 @@ const QRGeneratorPage = () => {
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-800">
-                    Today's QR Attendance Records
+                    Today's Meeting QR Attendance
                   </h3>
                   <p className="text-gray-500 text-sm mt-1">
-                    Trainees who have checked in via QR codes today (Meeting & Daily)
+                    Trainees who have checked in via meeting QR today
                   </p>
                 </div>
 
