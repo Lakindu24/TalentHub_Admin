@@ -14,28 +14,31 @@ const generateQRCode = async (internId) => {
   return qrCode;
 };
 
-// Generate Meeting QR Code with 10-minute expiry
-const generateMeetingQR = async () => {
+// Generate Meeting QR Code with 10-minute expiry and meetingTitle
+const generateMeetingQR = async (meetingTitle = "") => {
   const currentTime = new Date().getTime();
   const sessionId = `meeting_attendance_${currentTime}`;
-  const qrCodeContent = `attendance_session_meeting_attendance_${currentTime}`;
+  // Encode meetingTitle in QR code as JSON
+  const qrPayload = JSON.stringify({
+    type: 'meeting_attendance',
+    sessionId,
+    meetingTitle,
+    timestamp: currentTime
+  });
   const qrData = {
     sessionId,
-    qrCodeContent,
     type: 'meeting_attendance',
+    meetingTitle,
     generatedAt: currentTime,
     expiresAt: currentTime + (10 * 60 * 1000), // 10 minutes
     usedBy: [] // Track which interns have used this QR
   };
-  
   // Store in memory (in production, use Redis or database)
   activeQRCodes.set(sessionId, qrData);
-  
   // Clean up expired QR codes
   cleanupExpiredQRCodes();
-  
-  const qrCode = await QRCode.toDataURL(qrCodeContent);
-  return { qrCode, sessionId, expiresAt: qrData.expiresAt };
+  const qrCode = await QRCode.toDataURL(qrPayload);
+  return { qrCode, sessionId, expiresAt: qrData.expiresAt, meetingTitle };
 };
 
 // Generate Daily Attendance QR Code with 30-second expiry

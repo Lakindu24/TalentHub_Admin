@@ -22,6 +22,8 @@ import { motion } from "framer-motion";
 
 const QRGeneratorPage = () => {
   const [qrCode, setQrCode] = useState("");
+  const [meetingTitle, setMeetingTitle] = useState("");
+  const [displayMeetingTitle, setDisplayMeetingTitle] = useState("");
   const [attendanceLogs, setAttendanceLogs] = useState([]);
   const [isExpired, setIsExpired] = useState(false); // Track QR code expiry status
   const [modalOpen, setModalOpen] = useState(false);
@@ -29,14 +31,22 @@ const QRGeneratorPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const fetchQRCode = async () => {
+    if (!meetingTitle.trim()) {
+      toast.error("Please enter a meeting title.", {
+        duration: 3000,
+        icon: <AlertCircle size={18} />,
+      });
+      return;
+    }
     try {
       setIsLoading(true);
       const response = await api.get(
-        "/qrcode/generate-meeting-qr",
+        `/qrcode/generate-meeting-qr?meetingTitle=${encodeURIComponent(meetingTitle)}`,
         getAuthHeaders()
       );
       if (response.data.qrCode) {
         setQrCode(response.data.qrCode);
+        setDisplayMeetingTitle(meetingTitle);
         setIsExpired(false); // QR Code is now active
         toast.success("QR Code generated successfully!", {
           duration: 3000,
@@ -75,12 +85,6 @@ const QRGeneratorPage = () => {
               const isToday = attDate === today;
               const isPresent = a.status === "Present";
               const isQRType = (a.type === "qr");
-              
-              // Debug logging
-              if (isToday && isPresent) {
-                console.log(`Intern ${i.traineeId} - Date: ${attDate}, Status: ${a.status}, Type: ${a.type}, TimeMarked: ${a.timeMarked}`);
-              }
-              
               return isToday && isPresent && isQRType;
             }
           );
@@ -94,9 +98,6 @@ const QRGeneratorPage = () => {
               a.status === "Present" &&
               (a.type === "qr")
           );
-          
-          console.log(`Mapping intern ${i.traineeId}, found ${todayAttendances.length} attendance records:`, todayAttendances);
-          
           // Get the most recent attendance record
           const todayAttendance = todayAttendances.length > 0 
             ? todayAttendances.reduce((latest, current) => {
@@ -105,14 +106,19 @@ const QRGeneratorPage = () => {
                 return currentTime > latestTime ? current : latest;
               })
             : null;
-          
+          // Extract meeting title from meetingName field
+          let meetingTitle = "";
+          if (todayAttendance && todayAttendance.meetingName) {
+            meetingTitle = todayAttendance.meetingName;
+          }
           return {
             traineeId: i.traineeId,
             name: i.traineeName,
             time: todayAttendance?.timeMarked 
               ? new Date(todayAttendance.timeMarked).toLocaleTimeString()
               : new Date().toLocaleTimeString(),
-            type: todayAttendance?.type || "qr"
+            type: todayAttendance?.type || "qr",
+            meetingTitle
           };
         });
       
@@ -198,27 +204,38 @@ const QRGeneratorPage = () => {
               </div>
             </div>
 
-            <button
-              className={`flex items-center justify-center gap-2 bg-blue-300 px-6 py-2.5 text-black rounded-lg hover:bg-blue-700 hover:text-white transition-colors shadow-sm ${
-                isLoading ? "opacity-70 cursor-not-allowed" : ""
-              }`}
-              onClick={async () => {
-                if (!isLoading) {
-                  await fetchQRCode();
-                  setModalOpen(true);
-                }
-              }}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <Loader className="h-5 w-5 text-white animate-spin" />
-              ) : (
-                <>
-                  <QrCode size={18} />
-                  Generate QR Code
-                </>
-              )}
-            </button>
+            <div className="flex flex-col gap-2">
+              <input
+                type="text"
+                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                placeholder="Enter Meeting Title"
+                value={meetingTitle}
+                onChange={e => setMeetingTitle(e.target.value)}
+                disabled={isLoading}
+                style={{ minWidth: 220 }}
+              />
+              <button
+                className={`flex items-center justify-center gap-2 bg-blue-300 px-6 py-2.5 text-black rounded-lg hover:bg-blue-700 hover:text-white transition-colors shadow-sm ${
+                  isLoading ? "opacity-70 cursor-not-allowed" : ""
+                }`}
+                onClick={async () => {
+                  if (!isLoading) {
+                    await fetchQRCode();
+                    setModalOpen(true);
+                  }
+                }}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <Loader className="h-5 w-5 text-white animate-spin" />
+                ) : (
+                  <>
+                    <QrCode size={18} />
+                    Generate QR Code
+                  </>
+                )}
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -323,11 +340,15 @@ const QRGeneratorPage = () => {
                         <Calendar className="h-4 w-4" />
                         <p className="text-sm">{new Date().toDateString()}</p>
                       </div>
+                      {displayMeetingTitle && (
+                        <div className="mt-2 text-center">
+                          <span className="font-semibold text-blue-700">Meeting:</span> <span className="text-gray-800">{displayMeetingTitle}</span>
+                        </div>
+                      )}
                       <p className="text-sm text-gray-600 mt-4 text-center">
                         Have trainees scan this QR code with the attendance app
                         to mark their presence
                       </p>
-
                       <div className="flex gap-3 mt-6 w-full">
                         <button className="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg text-sm hover:bg-indigo-100 transition-colors">
                           <Download size={16} />
@@ -453,6 +474,12 @@ const QRGeneratorPage = () => {
                         scope="col"
                         className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                       >
+                        Meeting Title
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >
                         Type
                       </th>
                     </tr>
@@ -477,6 +504,13 @@ const QRGeneratorPage = () => {
                             <Clock className="h-4 w-4 text-gray-400 mr-2" />
                             {log.time}
                           </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                          {log.meetingTitle ? (
+                            <span className="font-medium text-blue-700">{log.meetingTitle}</span>
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${

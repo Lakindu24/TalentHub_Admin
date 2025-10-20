@@ -41,16 +41,17 @@ const generateDailyAttendanceQR = async (req, res) => {
   }
 };
 
-// Generate Meeting QR Code
+// Generate Meeting QR Code (with meetingTitle)
 const generateMeetingQR = async (req, res) => {
   try {
-    const qrResult = await qrCodeService.generateMeetingQR();
-    
+    const meetingTitle = req.query.meetingTitle || "";
+    const qrResult = await qrCodeService.generateMeetingQR(meetingTitle);
     res.status(200).json({
       message: "Meeting QR Code generated successfully",
       qrCode: qrResult.qrCode,
       sessionId: qrResult.sessionId,
-      expiresAt: qrResult.expiresAt
+      expiresAt: qrResult.expiresAt,
+      meetingTitle: qrResult.meetingTitle
     });
   } catch (error) {
     console.error("Error generating meeting QR Code:", error);
