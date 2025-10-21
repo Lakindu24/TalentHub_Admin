@@ -44,15 +44,31 @@ const InternHistory = () => {
           traineeId: log.traineeId,
           name: log.traineeName,
           attendanceInfo: log.attendanceInfo,
-          time: Array.isArray(log.attendanceInfo) 
+          time: Array.isArray(log.attendanceInfo)
             ? log.attendanceInfo.map(info => new Date(info.time).toLocaleTimeString()).join(", ")
             : new Date(log.attendanceInfo.time).toLocaleTimeString(),
           type: Array.isArray(log.attendanceInfo)
             ? log.attendanceInfo.map(info => info.type).join(", ")
             : log.attendanceInfo.type,
           method: Array.isArray(log.attendanceInfo)
-            ? log.attendanceInfo.map(info => info.method).join(", ")
-            : log.attendanceInfo.method
+            ? log.attendanceInfo.map(info => {
+                if (info.type === "Daily" || info.type === "Meeting") {
+                  return "QR Code Scan";
+                } else if (info.type === "Manual" || info.method === "Manual Entry") {
+                  return "Manual Method";
+                } else if (info.method === "QR Code Scan" || (info.method === "Manual Entry" && info.type === "Meeting")) {
+                  return "QR Code Scan";
+                } else {
+                  return info.method;
+                }
+              }).join(", ")
+            : (log.attendanceInfo.type === "Daily" || log.attendanceInfo.type === "Meeting"
+                ? "QR Code Scan"
+                : (log.attendanceInfo.type === "Manual" || log.attendanceInfo.method === "Manual Entry"
+                  ? "Manual Method"
+                  : (log.attendanceInfo.method === "QR Code Scan" || (log.attendanceInfo.method === "Manual Entry" && log.attendanceInfo.type === "Meeting")
+                    ? "QR Code Scan"
+                    : log.attendanceInfo.method)))
         }));
         setAttendanceLogs(formattedLogs);
       } else {
