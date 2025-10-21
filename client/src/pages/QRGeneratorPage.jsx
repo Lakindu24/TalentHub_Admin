@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from "react";
+import jsPDF from "jspdf";
+import logoURL from "../assets/slt logo.jpg";
+import "jspdf-autotable";
 import { api, getAuthHeaders } from "../api/apiConfig";
 import { toast, Toaster } from "react-hot-toast";
 import Navbar from "../components/Navbar";
@@ -21,6 +24,83 @@ import {
 import { motion } from "framer-motion";
 
 const QRGeneratorPage = () => {
+  // Generate PDF report for today's QR meeting attendance
+  const generateMeetingPDF = () => {
+    try {
+      const doc = new jsPDF();
+      const marginLeft = 14;
+
+      // Header
+      doc.setFillColor(248, 249, 250);
+      doc.rect(0, 0, doc.internal.pageSize.getWidth(), 40, "F");
+      // Add logo
+      try {
+        doc.addImage(logoURL, "JPEG", marginLeft, 15, 40, 15);
+      } catch (error) {}
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      doc.setTextColor(70, 70, 70);
+      doc.text("QR Meeting Attendance Report", marginLeft, 50);
+
+      doc.setFontSize(10);
+      doc.setTextColor(100, 100, 100);
+      doc.text(`Date: ${new Date().toLocaleDateString()}`, marginLeft, 60);
+      if (displayMeetingTitle) doc.text(`Meeting Title: ${displayMeetingTitle}`, marginLeft, 70);
+
+      // Total attendance count
+      doc.text(`Total Meeting Attendance: ${attendanceLogs.length}`, marginLeft, 80);
+
+      // Divider line
+      doc.setDrawColor(230, 230, 230);
+      doc.line(marginLeft, 85, doc.internal.pageSize.getWidth() - marginLeft, 85);
+
+      // Prepare table data
+      const tableData = attendanceLogs.map((log) => [
+        log.traineeId || "",
+        log.name || "",
+        log.time || "",
+        (log.meetingTitles && log.meetingTitles.length > 0 ? log.meetingTitles.join(", ") : displayMeetingTitle || ""),
+        log.type === "qr" ? "Meeting QR" : log.type || ""
+      ]);
+
+      doc.autoTable({
+        head: [["Trainee ID", "Name", "Check-in Time", "Meeting Title", "Type"]],
+        body: tableData,
+        startY: 95,
+        theme: "grid",
+        styles: { fontSize: 10, cellPadding: 6, lineWidth: 0.1 },
+        headStyles: {
+          fillColor: [41, 128, 185],
+          textColor: 255,
+          fontStyle: "bold",
+          lineColor: [220, 220, 220],
+        },
+        bodyStyles: {
+          fillColor: 255,
+          textColor: 80,
+          lineColor: [240, 240, 240],
+        },
+        alternateRowStyles: { fillColor: [252, 252, 252] },
+      });
+
+      // Footer with page numbers
+      const pageCount = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(9);
+        doc.setTextColor(150, 150, 150);
+        const pageWidth = doc.internal.pageSize.getWidth();
+        doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, doc.internal.pageSize.getHeight() - 10, { align: "center" });
+      }
+
+      // Filename
+      const fileName = `QR_Meeting_Attendance_Report_${new Date().toISOString().slice(0, 10)}.pdf`;
+      doc.save(fileName);
+    } catch (error) {
+      console.error("Error generating meeting PDF:", error);
+      toast.error("Failed to generate meeting PDF report");
+    }
+  };
   const [qrCode, setQrCode] = useState("");
   const [meetingTitle, setMeetingTitle] = useState("");
   const [displayMeetingTitle, setDisplayMeetingTitle] = useState("");
@@ -447,6 +527,15 @@ const QRGeneratorPage = () => {
             </div>
 
             <div className="overflow-x-auto">
+              <div className="flex justify-end items-center mb-4">
+                <button
+                  onClick={generateMeetingPDF}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-colors flex items-center gap-2"
+                >
+                  <Download className="h-4 w-4" />
+                  Download QR Meeting Attendance PDF
+                </button>
+              </div>
               {filteredLogs.length > 0 ? (
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
