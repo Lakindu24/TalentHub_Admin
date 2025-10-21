@@ -98,7 +98,11 @@ const QRGeneratorPage = () => {
               a.status === "Present" &&
               (a.type === "qr")
           );
-          // Get the most recent attendance record
+          // Collect all meeting titles for today
+          const meetingTitles = todayAttendances
+            .map(a => a.meetingName)
+            .filter(Boolean);
+          // Get the most recent attendance record for time/type
           const todayAttendance = todayAttendances.length > 0 
             ? todayAttendances.reduce((latest, current) => {
                 const latestTime = latest.timeMarked ? new Date(latest.timeMarked) : new Date(latest.date);
@@ -106,11 +110,6 @@ const QRGeneratorPage = () => {
                 return currentTime > latestTime ? current : latest;
               })
             : null;
-          // Extract meeting title from meetingName field
-          let meetingTitle = "";
-          if (todayAttendance && todayAttendance.meetingName) {
-            meetingTitle = todayAttendance.meetingName;
-          }
           return {
             traineeId: i.traineeId,
             name: i.traineeName,
@@ -118,7 +117,7 @@ const QRGeneratorPage = () => {
               ? new Date(todayAttendance.timeMarked).toLocaleTimeString()
               : new Date().toLocaleTimeString(),
             type: todayAttendance?.type || "qr",
-            meetingTitle
+            meetingTitles
           };
         });
       
@@ -506,8 +505,10 @@ const QRGeneratorPage = () => {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                          {log.meetingTitle ? (
-                            <span className="font-medium text-blue-700">{log.meetingTitle}</span>
+                          {log.meetingTitles && log.meetingTitles.length > 0 ? (
+                            <span className="font-medium text-blue-700">
+                              {log.meetingTitles.join(", ")}
+                            </span>
                           ) : (
                             <span className="text-gray-400">-</span>
                           )}
