@@ -17,7 +17,10 @@ class InternRepository {
     return await Intern.findById(internId);
   }
   static async findByEmail(email) {
-    return await Intern.findOne({ email: email.toLowerCase() });
+    if (!email) return null;
+    // DB stores email under Trainee_Email (canonical). Use case-insensitive match to be robust.
+    const escaped = String(email).trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return await Intern.findOne({ Trainee_Email: { $regex: `^${escaped}$`, $options: 'i' } });
   }
 
 
@@ -60,7 +63,7 @@ class InternRepository {
         throw new Error("Intern not found");
       }
 
-      console.log("Found intern:", intern.traineeName);
+  console.log("Found intern:", intern.Trainee_Name);
 
       const attendanceDate = new Date(date).setHours(0, 0, 0, 0);
       const actualTimeMarked = timeMarked || new Date();
@@ -356,8 +359,14 @@ class InternRepository {
 
       if (hasRelevantAttendance) {
         attendedInterns.push({
-          traineeId: intern.traineeId,
-          traineeName: intern.traineeName,
+          Trainee_ID: intern.Trainee_ID,
+          Trainee_Name: intern.Trainee_Name,
+          field_of_spec_name: intern.field_of_spec_name,
+          Institute: intern.Institute,
+          Training_StartDate: intern.Training_StartDate,
+          Training_EndDate: intern.Training_EndDate,
+          Trainee_Email: intern.Trainee_Email,
+          Trainee_HomeAddress: intern.Trainee_HomeAddress,
           attendanceInfo: attendanceInfo
         });
       }
@@ -441,7 +450,8 @@ class InternRepository {
   }
 
   static async findByTraineeId(traineeId) {
-    return await Intern.findOne({ traineeId: traineeId });
+  // DB is canonical with Trainee_ID
+  return await Intern.findOne({ Trainee_ID: traineeId?.toString() });
   }
   
 }

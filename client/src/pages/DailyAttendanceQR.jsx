@@ -113,10 +113,10 @@ const DailyAttendanceQR = () => {
 
           
           return {
-            traineeId: intern.traineeId,
-            name: intern.traineeName,
-            timeMarked: todayAttendance.timeMarked || todayAttendance.date,
-            status: todayAttendance.status,
+            traineeId: intern.Trainee_ID || intern.traineeId || "",
+            name: intern.Trainee_Name || intern.traineeName || "",
+            timeMarked: todayAttendance?.timeMarked || todayAttendance?.date,
+            status: todayAttendance?.status,
             type: 'daily_qr'
           };
         })

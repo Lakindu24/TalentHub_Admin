@@ -125,13 +125,13 @@ export const exportPresentReport = ({ filteredInterns, month, week, year, startD
 
   const ws = XLSX.utils.json_to_sheet(
     reports.presentInterns.map((intern) => ({
-      "Trainee ID": intern.traineeId,
-      Name: intern.traineeName,
-      Specialization: intern.fieldOfSpecialization,
+      "Trainee ID": intern.Trainee_ID,
+      Name: intern.Trainee_Name,
+      Specialization: intern.field_of_spec_name,
       Team: intern.team,
-      Institute: intern.institute || "N/A",
-      "Start Date": formatDate(intern.trainingStartDate),
-      "End Date": formatDate(intern.trainingEndDate),
+      Institute: intern.Institute || "N/A",
+      "Start Date": formatDate(intern.Training_StartDate),
+      "End Date": formatDate(intern.Training_EndDate),
       Status: "Present",
       "Date Range":
         reports.week && reports.month
@@ -213,10 +213,10 @@ export const exportPresentPDF = ({ filteredInterns, month, week, year, startDate
     );
 
     const tableData = reports.presentInterns.map((intern) => [
-      intern.traineeId || "",
-      intern.traineeName || "",
-      intern.fieldOfSpecialization || "",
-      intern.institute || "N/A",
+      intern.Trainee_ID || "",
+      intern.Trainee_Name || "",
+      intern.field_of_spec_name || "",
+      intern.Institute || "N/A",
       "Present",
     ]);
 
@@ -329,13 +329,13 @@ export const exportAbsentReport = ({ filteredInterns, month, week, year, startDa
 
   const ws = XLSX.utils.json_to_sheet(
     reports.absentInterns.map((intern) => ({
-      "Trainee ID": intern.traineeId,
-      Name: intern.traineeName,
-      Specialization: intern.fieldOfSpecialization,
+      "Trainee ID": intern.Trainee_ID,
+      Name: intern.Trainee_Name,
+      Specialization: intern.field_of_spec_name,
       Team: intern.team,
-      Institute: intern.institute || "N/A",
-      "Start Date": formatDate(intern.trainingStartDate),
-      "End Date": formatDate(intern.trainingEndDate),
+      Institute: intern.Institute || "N/A",
+      "Start Date": formatDate(intern.Training_StartDate),
+      "End Date": formatDate(intern.Training_EndDate),
       Status: "Absent",
       "Absent Entire Week": reports.absentAllWeekdaysInterns.some(
         (i) => i._id === intern._id
@@ -428,10 +428,10 @@ export const exportAbsentPDF = ({ filteredInterns, month, week, year, startDate,
     );
 
     const tableData = reports.absentInterns.map((intern) => [
-      intern.traineeId || "",
-      intern.traineeName || "",
-      intern.fieldOfSpecialization || "",
-      intern.institute || "N/A",
+      intern.Trainee_ID || "",
+      intern.Trainee_Name || "",
+      intern.field_of_spec_name || "",
+      intern.Institute || "N/A",
       "Absent",
       reports.absentAllWeekdaysInterns.some((i) => i._id === intern._id)
         ? "Yes"

@@ -56,8 +56,8 @@ const QRGeneratorPage = () => {
 
       // Prepare table data
       const tableData = attendanceLogs.map((log) => [
-        log.traineeId || "",
-        log.name || "",
+  log.Trainee_ID || "",
+  log.Trainee_Name || "",
         log.time || "",
         (log.meetingTitles && log.meetingTitles.length > 0 ? log.meetingTitles.join(", ") : displayMeetingTitle || ""),
         log.type === "qr" ? "Meeting QR" : log.type || ""
@@ -191,8 +191,8 @@ const QRGeneratorPage = () => {
               })
             : null;
           return {
-            traineeId: i.traineeId,
-            name: i.traineeName,
+            Trainee_ID: i.Trainee_ID,
+            Trainee_Name: i.Trainee_Name,
             time: todayAttendance?.timeMarked 
               ? new Date(todayAttendance.timeMarked).toLocaleTimeString()
               : new Date().toLocaleTimeString(),
@@ -229,9 +229,17 @@ const QRGeneratorPage = () => {
   // Filter logs based on search term
   const filteredLogs = attendanceLogs.filter(
     (log) =>
-      log.traineeId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.name.toLowerCase().includes(searchTerm.toLowerCase())
+      (log.Trainee_ID || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (log.Trainee_Name || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Ensure trainee ID and name are displayed correctly in table and logs
+  // If attendanceLogs are built from API, map them to use correct fields
+  const displayLogs = filteredLogs.map(log => ({
+    ...log,
+    traineeId: log.Trainee_ID || log.traineeId || "",
+    name: log.Trainee_Name || log.name || ""
+  }));
   
   console.log("Component render - attendanceLogs state:", attendanceLogs);
   console.log("Component render - filteredLogs for display:", filteredLogs);
@@ -578,13 +586,13 @@ const QRGeneratorPage = () => {
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                           <div className="flex items-center">
                             <QrCode className="h-4 w-4 text-gray-400 mr-2" />
-                            {log.traineeId}
+                            {log.Trainee_ID || log.traineeId || ""}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                           <div className="flex items-center">
                             <User className="h-4 w-4 text-gray-400 mr-2" />
-                            {log.name}
+                            {log.Trainee_Name || log.name || ""}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

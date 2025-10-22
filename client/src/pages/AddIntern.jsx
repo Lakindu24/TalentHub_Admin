@@ -6,9 +6,9 @@ import Navbar from "../components/Navbar";
 import { Toaster, toast } from "react-hot-toast";
 
 const AddIntern = () => {
-  const [traineeId, setTraineeId] = useState("");
-  const [traineeName, setTraineeName] = useState("");
-  const [fieldOfSpecialization, setFieldOfSpecialization] = useState("");
+  const [Trainee_ID, setTraineeId] = useState("");
+  const [Trainee_Name, setTraineeName] = useState("");
+  const [field_of_spec_name, setFieldOfSpecialization] = useState("");
   const [specializations, setSpecializations] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -18,7 +18,7 @@ const AddIntern = () => {
         const response = await api.get("/interns", getAuthHeaders());
         const fetchedInterns = response.data || [];
         const uniqueSpecializations = Array.from(
-          new Set(fetchedInterns.map((intern) => intern.fieldOfSpecialization).filter(Boolean))
+          new Set(fetchedInterns.map((intern) => intern.field_of_spec_name).filter(Boolean))
         ).sort();
         setSpecializations(uniqueSpecializations);
       } catch (error) {
@@ -32,7 +32,7 @@ const AddIntern = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!traineeId || !traineeName || !fieldOfSpecialization) {
+    if (!Trainee_ID || !Trainee_Name || !field_of_spec_name) {
       toast.error("Please fill in all required fields.");
       return;
     }
@@ -41,7 +41,7 @@ const AddIntern = () => {
     try {
       const response = await api.post(
         "/interns/add",
-        { traineeId, traineeName, fieldOfSpecialization },
+        { Trainee_ID, Trainee_Name, field_of_spec_name },
         getAuthHeaders()
       );
 

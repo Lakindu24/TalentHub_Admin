@@ -10,21 +10,21 @@ const attendanceSchema = new mongoose.Schema({
 });
 
 const internSchema = new mongoose.Schema({
-  traineeId: { type: String, required: true, unique: true },
-  traineeName: { type: String, required: true },
-  fieldOfSpecialization: { type: String, required: true },
-  homeAddress: { type: String, default: "" },
-  trainingStartDate: { type: Date },
-  trainingEndDate: { type: Date },  
-  institute: { type: String, default: "" },  
+  Trainee_ID: { type: String, required: true, unique: true },
+  Trainee_Name: { type: String, required: true },
+  field_of_spec_name: { type: String, required: true },
+  Training_StartDate: { type: Date },
+  Training_EndDate: { type: Date },
+  Institute: { type: String, default: "" },
+  Trainee_Email: { type: String, default: "" },
+  Trainee_HomeAddress: { type: String, default: "" },
   team: { type: String, default: "" },
-  email: { type: String, default: "" },
   attendance: [attendanceSchema],
   availableDays: {
     type: [String],
     enum: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
     default: [],
   },
-}, { timestamps: true });  // Consider adding timestamps for tracking
+}, { timestamps: true });
 
 module.exports = mongoose.model("Intern", internSchema);

@@ -41,8 +41,9 @@ const InternHistory = () => {
       
       if (logs) {
         const formattedLogs = logs.map((log) => ({
-          traineeId: log.traineeId,
-          name: log.traineeName,
+          ...log,
+          traineeId: log.Trainee_ID || log.traineeId || "",
+          name: log.Trainee_Name || log.name || "",
           attendanceInfo: log.attendanceInfo,
           time: Array.isArray(log.attendanceInfo)
             ? log.attendanceInfo.map(info => new Date(info.time).toLocaleTimeString()).join(", ")
@@ -95,9 +96,13 @@ const InternHistory = () => {
   }, [fetchAttendanceLogs]);
 
   const filteredLogs = attendanceLogs.filter(
-    (log) =>
-      log.traineeId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.name.toLowerCase().includes(searchTerm.toLowerCase())
+    (log) => {
+      if (!log || typeof log !== "object") return false;
+      const traineeId = typeof log.Trainee_ID === "string" ? log.Trainee_ID.toLowerCase() : "";
+      const name = typeof log.Trainee_Name === "string" ? log.Trainee_Name.toLowerCase() : "";
+      const term = searchTerm ? searchTerm.toLowerCase() : "";
+      return traineeId.includes(term) || name.includes(term);
+    }
   );
 
   return (
@@ -229,13 +234,13 @@ const InternHistory = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     <div className="flex items-center">
                       <User className="h-4 w-4 text-gray-400 mr-2" />
-                      {log.traineeId}
+                      {log.Trainee_ID || log.traineeId || log.id || ""}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                     <div className="flex items-center">
                       <User className="h-4 w-4 text-gray-400 mr-2" />
-                      {log.name}
+                      {log.Trainee_Name || log.name || log.fullName || ""}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
