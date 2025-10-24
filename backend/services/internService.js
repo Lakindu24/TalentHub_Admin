@@ -10,13 +10,37 @@ class InternService {
 
   // Update the getAllInterns method
   async getAllInterns(date) {
-    // Feature toggle: if mode is 'external', fetch from API instead of DB
+    // Feature toggle: if mode is 'external', fetch from API and sync to DB for attendance marking
     let interns;
     if (config.traineesApi.mode === 'external') {
-      interns = await this.getActiveInternsFromExternal();
+      // First sync external interns to database to ensure they have _id fields for attendance marking
+      await this.syncActiveInterns();
+      // Then fetch from database to get proper _id fields and existing attendance records
+      interns = await InternRepository.getAllInterns();
     } else {
       interns = await InternRepository.getAllInterns();
     }
+
+    // Normalize field names for frontend compatibility
+    interns = interns.map(intern => {
+      const normalized = {
+        _id: intern._id,
+        traineeId: intern.Trainee_ID || intern.traineeId,
+        traineeName: intern.Trainee_Name || intern.traineeName,
+        fieldOfSpecialization: intern.field_of_spec_name || intern.fieldOfSpecialization,
+        trainingStartDate: intern.Training_StartDate || intern.trainingStartDate,
+        trainingEndDate: intern.Training_EndDate || intern.trainingEndDate,
+        institute: intern.Institute || intern.institute || "",
+        email: intern.Trainee_Email || intern.email || "",
+        homeAddress: intern.Trainee_HomeAddress || intern.homeAddress || "",
+        team: intern.team || "",
+        attendance: intern.attendance || [],
+        availableDays: intern.availableDays || [],
+        createdAt: intern.createdAt,
+        updatedAt: intern.updatedAt
+      };
+      return normalized;
+    });
 
     if (date) {
       const formattedDate = moment.tz(date, "Asia/Colombo").startOf('day').toDate();
@@ -40,7 +64,26 @@ class InternService {
   }
 
   async getInternById(internId) {
-    return await InternRepository.getInternById(internId);
+    const intern = await InternRepository.getInternById(internId);
+    if (!intern) return null;
+    
+    // Normalize field names for frontend compatibility
+    return {
+      _id: intern._id,
+      traineeId: intern.Trainee_ID || intern.traineeId,
+      traineeName: intern.Trainee_Name || intern.traineeName,
+      fieldOfSpecialization: intern.field_of_spec_name || intern.fieldOfSpecialization,
+      trainingStartDate: intern.Training_StartDate || intern.trainingStartDate,
+      trainingEndDate: intern.Training_EndDate || intern.trainingEndDate,
+      institute: intern.Institute || intern.institute || "",
+      email: intern.Trainee_Email || intern.email || "",
+      homeAddress: intern.Trainee_HomeAddress || intern.homeAddress || "",
+      team: intern.team || "",
+      attendance: intern.attendance || [],
+      availableDays: intern.availableDays || [],
+      createdAt: intern.createdAt,
+      updatedAt: intern.updatedAt
+    };
   }
 
   /**
@@ -63,20 +106,35 @@ class InternService {
         const existing = await InternRepository.findByTraineeId(ext.traineeId);
         if (existing) {
           // Update selective fields; do not overwrite attendance or team unless provided
-          existing.traineeName = ext.traineeName || existing.traineeName;
-          existing.fieldOfSpecialization = ext.fieldOfSpecialization || existing.fieldOfSpecialization;
-          existing.trainingStartDate = ext.trainingStartDate || existing.trainingStartDate;
-          existing.trainingEndDate = ext.trainingEndDate || existing.trainingEndDate;
-          existing.institute = ext.institute ?? existing.institute;
-          existing.homeAddress = ext.homeAddress ?? existing.homeAddress;
-          existing.email = ext.email ?? existing.email;
+          existing.Trainee_Name = ext.traineeName || existing.Trainee_Name;
+          existing.field_of_spec_name = ext.fieldOfSpecialization || existing.field_of_spec_name;
+          existing.Training_StartDate = ext.trainingStartDate || existing.Training_StartDate;
+          existing.Training_EndDate = ext.trainingEndDate || existing.Training_EndDate;
+          existing.Institute = ext.institute ?? existing.Institute;
+          existing.Trainee_HomeAddress = ext.homeAddress ?? existing.Trainee_HomeAddress;
+          existing.Trainee_Email = ext.email ?? existing.Trainee_Email;
           await existing.save({ validateBeforeSave: false });
           results.updated++;
         } else {
-          await InternRepository.addIntern(ext);
+          // Map external API fields to database model fields
+          const mappedIntern = {
+            Trainee_ID: ext.traineeId,
+            Trainee_Name: ext.traineeName,
+            field_of_spec_name: ext.fieldOfSpecialization,
+            Training_StartDate: ext.trainingStartDate,
+            Training_EndDate: ext.trainingEndDate,
+            Institute: ext.institute || "",
+            Trainee_Email: ext.email || "",
+            Trainee_HomeAddress: ext.homeAddress || "",
+            team: ext.team || "",
+            attendance: ext.attendance || [],
+            availableDays: ext.availableDays || []
+          };
+          await InternRepository.addIntern(mappedIntern);
           results.created++;
         }
       } catch (e) {
+        console.error('Error syncing intern:', ext.traineeId, e.message);
         results.errors++;
       }
     }
