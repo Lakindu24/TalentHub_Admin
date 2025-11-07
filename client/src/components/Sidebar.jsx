@@ -1,4 +1,4 @@
-import React, { useState } from "react"; 
+import React, { useState, useEffect } from "react"; 
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   HomeIcon,
@@ -16,7 +16,8 @@ import {
   PanelLeftOpen, 
   Upload,
   QrCodeIcon,
-  RefreshCcw
+  RefreshCcw,
+  X
 } from "lucide-react";
 
 const SidebarButton = ({
@@ -55,7 +56,7 @@ const SidebarButton = ({
   </button>
 );
 
-const Sidebar = () => {
+const Sidebar = ({ isMobileOpen, setIsMobileOpen }) => {
   const [isInternMenuOpen, setIsInternMenuOpen] = useState(false);
   const [isGroupMenuOpen, setIsGroupMenuOpen] = useState(false);
   const [isProjectMenuOpen, setIsProjectMenuOpen] = useState(false);
@@ -67,14 +68,57 @@ const Sidebar = () => {
 
   const handleNavigation = (path) => {
     navigate(path);
+    // Close mobile menu after navigation
+    if (setIsMobileOpen) {
+      setIsMobileOpen(false);
+    }
   };
 
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
   };
 
+  // Close mobile menu when clicking outside on mobile
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isMobileOpen && !event.target.closest('.sidebar-container') && !event.target.closest('.hamburger-button')) {
+        setIsMobileOpen(false);
+      }
+    };
+
+    if (isMobileOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isMobileOpen, setIsMobileOpen]);
+
   return (
-    <div className={`${collapsed ? 'w-20' : 'w-64'}  bg-[#00102F] min-h-screen h-full flex flex-col shadow-xl sticky top-0 transition-all duration-300`}>
+    <>
+      {/* Overlay for mobile */}
+      {isMobileOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setIsMobileOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div className={`sidebar-container ${
+        isMobileOpen ? 'translate-x-0' : '-translate-x-full'
+      } lg:translate-x-0 fixed lg:sticky top-0 left-0 z-50 lg:z-auto
+        ${collapsed ? 'w-20' : 'w-64'} bg-[#00102F] min-h-screen h-full flex flex-col shadow-xl 
+        transition-all duration-300 ease-in-out`}
+      >
+        {/* Close button for mobile */}
+        <button
+          onClick={() => setIsMobileOpen(false)}
+          className="lg:hidden absolute right-4 top-4 text-white hover:text-gray-300 transition-colors"
+        >
+          <X className="h-6 w-6" />
+        </button>
       {/* Logo/Header */}
       <div className="flex justify-center p-4 border-b border-gray-700/50 bg-black/20">
         <div className="relative group cursor-pointer my-4">
@@ -82,10 +126,10 @@ const Sidebar = () => {
         </div>
       </div>
 
-      {/* Toggle Button */}
+      {/* Toggle Button - Hidden on mobile */}
       <button 
         onClick={toggleSidebar}
-        className="absolute right-0 top-20 transform translate-x-1/2 bg-green-600 text-white p-1.5 rounded-full shadow-lg hover:bg-green-700 transition-colors duration-300"
+        className="hidden lg:block absolute right-0 top-20 transform translate-x-1/2 bg-green-600 text-white p-1.5 rounded-full shadow-lg hover:bg-green-700 transition-colors duration-300"
       >
         {collapsed ? (
           <PanelLeftOpen className="h-4 w-4" />
@@ -237,8 +281,10 @@ const Sidebar = () => {
           collapsed={collapsed}
         />
       </div>      
-    </div>
+      {/* End of Sidebar content */}
+      </div>
+    </>
   );
-};
+}
 
 export default Sidebar;

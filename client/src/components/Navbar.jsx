@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { User, LogOut, ChevronDown } from 'lucide-react';
+import { User, LogOut, ChevronDown, Menu } from 'lucide-react';
 import logo from "../assets/slt logo.jpg";
 
-const Navbar = () => {
+const Navbar = ({ onMenuClick }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -35,9 +35,17 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-[#00102F] text-white fixed top-0 right-0 w-full py-3 md:py-6 z-40 border-b border-white/5">
+    <nav className="bg-[#00102F] text-white fixed top-0 right-0 left-0 lg:left-auto w-full py-3 md:py-6 z-40 border-b border-white/5">
       <div className="max-w-full px-4 md:px-8">
         <div className="flex items-center justify-between h-16">
+          {/* Hamburger Menu Button for Mobile */}
+          <button
+            onClick={onMenuClick}
+            className="lg:hidden hamburger-button text-white hover:text-gray-300 transition-colors p-2"
+          >
+            <Menu className="h-6 w-6" />
+          </button>
+
           {/* Logo */}
           <div className="flex items-center">
             <img
@@ -47,13 +55,13 @@ const Navbar = () => {
             />
           </div>
 
-          {/* Desktop Navigation */}
-          <div className="flex items-center md:space-x-8 flex-1 justify-start ml-32">
+          {/* Desktop Navigation - Hidden on mobile and tablet */}
+          <div className="hidden xl:flex items-center space-x-4 2xl:space-x-8 flex-1 justify-start ml-8 2xl:ml-32">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
-                className={`text-gray-300 hover:text-[#4FB846] transition-all duration-200 py-2 relative
+                className={`text-gray-300 hover:text-[#4FB846] transition-all duration-200 py-2 relative text-sm 2xl:text-base
                           after:content-[''] after:absolute after:bottom-0 after:left-0 after:h-0.5 
                           after:bg-[#4FB846] after:transition-all after:duration-300 hover:after:w-full
                           ${isActive(link.path)}`}
