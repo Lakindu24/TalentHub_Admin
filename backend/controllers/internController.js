@@ -3,14 +3,15 @@ const attendanceService = require("../services/attendanceService");
 const { parseXLSX, addInternsFromXLSX } = require("../utils/xlsxHandler");
 const sendEmail = require("../utils/emailSender");
 const moment = require("moment");
-const fs = require('fs');
-const path = require('path');
-
+const fs = require("fs");
+const path = require("path");
 
 const addIntern = async (req, res) => {
   try {
     const newIntern = await InternService.addIntern(req.body);
-    res.status(201).json({ message: "Intern added successfully!", intern: newIntern });
+    res
+      .status(201)
+      .json({ message: "Intern added successfully!", intern: newIntern });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -18,24 +19,29 @@ const addIntern = async (req, res) => {
 
 const addExternalIntern = async (req, res) => {
   try {
-
     const newInternData = req.body;
 
     const newIntern = await InternService.addIntern(newInternData);
 
-    res.status(201).json({ message: "Intern added successfully!", intern: newIntern });
+    res
+      .status(201)
+      .json({ message: "Intern added successfully!", intern: newIntern });
   } catch (error) {
-    res.status(500).json({ message: "Error adding intern", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error adding intern", error: error.message });
   }
 };
 
 const getAllInterns = async (req, res) => {
-  const { date } = req.query;  // If date is missing, it will be undefined
+  const { date } = req.query; // If date is missing, it will be undefined
   try {
     const interns = await InternService.getAllInterns(date);
     res.status(200).json(interns);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching interns", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching interns", error: error.message });
   }
 };
 
@@ -45,7 +51,12 @@ const getActiveInternsExternal = async (req, res) => {
     const interns = await InternService.getActiveInternsFromExternal();
     res.status(200).json(interns);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching interns from external API", error: error.message });
+    res
+      .status(500)
+      .json({
+        message: "Error fetching interns from external API",
+        error: error.message,
+      });
   }
 };
 
@@ -55,10 +66,14 @@ const syncActiveInterns = async (req, res) => {
     const result = await InternService.syncActiveInterns();
     res.status(200).json({ message: "Sync complete", ...result });
   } catch (error) {
-    res.status(500).json({ message: "Error syncing interns from external API", error: error.message });
+    res
+      .status(500)
+      .json({
+        message: "Error syncing interns from external API",
+        error: error.message,
+      });
   }
 };
-
 
 const getInternById = async (req, res) => {
   try {
@@ -68,7 +83,9 @@ const getInternById = async (req, res) => {
     }
     res.status(200).json(intern);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching intern", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching intern", error: error.message });
   }
 };
 
@@ -80,11 +97,11 @@ const getInternByIdEach = async (req, res) => {
     }
     res.status(200).json(intern);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching intern", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching intern", error: error.message });
   }
 };
-
-
 
 const getAttendanceStats = async (req, res) => {
   try {
@@ -109,43 +126,68 @@ const markAttendance = async (req, res) => {
       return res.status(400).json({ message: "Status is required" });
     }
 
-    const attendanceType = type || 'manual';
+    const attendanceType = type || "manual";
     const markedTime = timeMarked || new Date();
 
-    const updatedIntern = await attendanceService.markAttendanceAndNotify(internId, status, date, attendanceType, markedTime);
-    res.status(200).json({ message: "Attendance marked successfully", intern: updatedIntern });
+    const updatedIntern = await attendanceService.markAttendanceAndNotify(
+      internId,
+      status,
+      date,
+      attendanceType,
+      markedTime
+    );
+    res
+      .status(200)
+      .json({
+        message: "Attendance marked successfully",
+        intern: updatedIntern,
+      });
   } catch (error) {
     console.error("Error in markAttendance controller:", error);
-    res.status(500).json({ 
-      message: "Error marking attendance", 
+    res.status(500).json({
+      message: "Error marking attendance",
       error: error.message,
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      details: process.env.NODE_ENV === "development" ? error.stack : undefined,
     });
   }
 };
 
-
 const updateAttendance = async (req, res) => {
   try {
     const { date, status } = req.body;
-    const updatedIntern = await InternService.updateAttendance(req.params.id, date, status);
-    res.status(200).json({ message: "Attendance updated successfully", intern: updatedIntern });
+    const updatedIntern = await InternService.updateAttendance(
+      req.params.id,
+      date,
+      status
+    );
+    res
+      .status(200)
+      .json({
+        message: "Attendance updated successfully",
+        intern: updatedIntern,
+      });
   } catch (error) {
-    res.status(500).json({ message: "Error updating attendance", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error updating attendance", error: error.message });
   }
 };
-
 
 const assignToTeam = async (req, res) => {
   try {
     await InternService.assignToTeam(req.body.internIds, req.body.teamName);
-    res.status(200).json({ message: "Interns successfully assigned to the team" });
+    res
+      .status(200)
+      .json({ message: "Interns successfully assigned to the team" });
   } catch (error) {
-    res.status(500).json({ message: "Error assigning interns to team", error: error.message });
+    res
+      .status(500)
+      .json({
+        message: "Error assigning interns to team",
+        error: error.message,
+      });
   }
 };
-
-
 
 const removeFromTeam = async (req, res) => {
   try {
@@ -153,13 +195,17 @@ const removeFromTeam = async (req, res) => {
     const { teamName } = req.params;
 
     if (!internId || !teamName) {
-      return res.status(400).json({ message: "Intern ID and Team Name are required." });
+      return res
+        .status(400)
+        .json({ message: "Intern ID and Team Name are required." });
     }
-
 
     const decodedTeamName = decodeURIComponent(teamName);
 
-    const result = await InternService.removeFromTeam(internId, decodedTeamName);
+    const result = await InternService.removeFromTeam(
+      internId,
+      decodedTeamName
+    );
     if (result) {
       return res.status(200).json({ message: "Intern removed from the team." });
     } else {
@@ -171,8 +217,6 @@ const removeFromTeam = async (req, res) => {
   }
 };
 
-
-
 const removeIntern = async (req, res) => {
   try {
     const deletedIntern = await InternService.removeIntern(req.params.id);
@@ -181,23 +225,30 @@ const removeIntern = async (req, res) => {
     }
     res.status(200).json({ message: "Intern removed successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Error removing intern", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error removing intern", error: error.message });
   }
 };
-
 
 const updateIntern = async (req, res) => {
   try {
-    const updatedIntern = await InternService.updateIntern(req.params.id, req.body);
+    const updatedIntern = await InternService.updateIntern(
+      req.params.id,
+      req.body
+    );
     if (!updatedIntern) {
       return res.status(404).json({ message: "Intern not found" });
     }
-    res.status(200).json({ message: "Intern updated successfully", intern: updatedIntern });
+    res
+      .status(200)
+      .json({ message: "Intern updated successfully", intern: updatedIntern });
   } catch (error) {
-    res.status(500).json({ message: "Error updating intern", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error updating intern", error: error.message });
   }
 };
-
 
 const uploadInterns = async (req, res) => {
   try {
@@ -205,10 +256,7 @@ const uploadInterns = async (req, res) => {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
-    
-
     const interns = parseXLSX(req.file.path);
-    
 
     const { addedCount, skippedCount } = await addInternsFromXLSX(interns);
 
@@ -219,7 +267,9 @@ const uploadInterns = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Error uploading file:", error);
-    res.status(500).json({ message: "Error processing file", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error processing file", error: error.message });
   }
 };
 
@@ -228,7 +278,9 @@ const getAllTeams = async (req, res) => {
     const teams = await InternService.getAllTeams();
     res.status(200).json(teams);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching teams", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching teams", error: error.message });
   }
 };
 
@@ -241,13 +293,17 @@ const updateTeamName = async (req, res) => {
       return res.status(400).json({ message: "New team name is required" });
     }
 
-
     const decodedOldTeamName = decodeURIComponent(oldTeamName);
 
-    const result = await InternService.updateTeamName(decodedOldTeamName, newTeamName);
+    const result = await InternService.updateTeamName(
+      decodedOldTeamName,
+      newTeamName
+    );
     res.status(200).json(result);
   } catch (error) {
-    res.status(500).json({ message: "Error updating team", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error updating team", error: error.message });
   }
 };
 
@@ -257,13 +313,17 @@ const assignSingleToTeam = async (req, res) => {
     const { teamName } = req.params;
 
     if (!internId || !teamName) {
-      return res.status(400).json({ message: "Intern ID and Team Name are required." });
+      return res
+        .status(400)
+        .json({ message: "Intern ID and Team Name are required." });
     }
-
 
     const decodedTeamName = decodeURIComponent(teamName);
 
-    const result = await InternService.assignSingleToTeam(internId, decodedTeamName);
+    const result = await InternService.assignSingleToTeam(
+      internId,
+      decodedTeamName
+    );
     if (result) {
       return res.status(200).json({ message: "Intern added to the team!" });
     } else {
@@ -275,10 +335,8 @@ const assignSingleToTeam = async (req, res) => {
   }
 };
 
-
 const deleteTeam = async (req, res) => {
   try {
-
     const teamName = decodeURIComponent(req.params.teamName);
 
     const result = await InternService.deleteTeam(teamName);
@@ -294,10 +352,12 @@ const deleteTeam = async (req, res) => {
 const getAttendanceStatsForToday = async (req, res) => {
   try {
     const stats = await InternService.getAttendanceStatsForToday();
-    res.status(200).json(stats);  // Returns { present: 10, absent: 5 }
+    res.status(200).json(stats); // Returns { present: 10, absent: 5 }
   } catch (error) {
     console.error("Error fetching today's attendance stats:", error);
-    res.status(500).json({ message: "Error fetching today's attendance stats." });
+    res
+      .status(500)
+      .json({ message: "Error fetching today's attendance stats." });
   }
 };
 
@@ -308,7 +368,9 @@ const getAttendanceStatsByType = async (req, res) => {
     res.status(200).json(stats);
   } catch (error) {
     console.error("Error fetching attendance stats by type:", error);
-    res.status(500).json({ message: "Error fetching attendance stats by type." });
+    res
+      .status(500)
+      .json({ message: "Error fetching attendance stats by type." });
   }
 };
 
@@ -319,25 +381,37 @@ const getTodayAttendanceByType = async (req, res) => {
     res.status(200).json(attendanceList);
   } catch (error) {
     console.error("Error fetching today's attendance list by type:", error);
-    res.status(500).json({ message: "Error fetching today's attendance list." });
+    res
+      .status(500)
+      .json({ message: "Error fetching today's attendance list." });
   }
 };
 
 const updateAttendanceForSpecificDate = async (req, res) => {
   const { id } = req.params;
-  const { date, status } = req.body;  // Date and status (Present/Absent)
+  const { date, status } = req.body; // Date and status (Present/Absent)
 
   try {
-    const updatedIntern = await InternService.updateAttendanceForSpecificDate(id, date, status);
+    const updatedIntern = await InternService.updateAttendanceForSpecificDate(
+      id,
+      date,
+      status
+    );
     res.status(200).json(updatedIntern);
   } catch (error) {
-    res.status(500).json({ message: "Error updating attendance for the selected date", error: error.message });
+    res
+      .status(500)
+      .json({
+        message: "Error updating attendance for the selected date",
+        error: error.message,
+      });
   }
 };
 
 const getWeeklyAttendanceStats = async (req, res) => {
   try {
-    const { attendedInterns, notAttendedInterns } = await InternService.getWeeklyAttendanceStats();
+    const { attendedInterns, notAttendedInterns } =
+      await InternService.getWeeklyAttendanceStats();
 
     res.status(200).json({
       attendedInterns,
@@ -359,24 +433,38 @@ const getAttendanceByInternId = async (req, res) => {
     }
 
     // Log the intern data
-    
+
+    // Combine physical and online attendance
+    const combinedAttendance = [
+      ...(intern.attendance || []),
+      ...(intern.onlineAttendance || []),
+    ];
+
+    // Sort combined attendance by date (most recent first)
+    combinedAttendance.sort((a, b) => new Date(b.date) - new Date(a.date));
 
     const response = {
-      attendance: intern.attendance,
+      attendance: combinedAttendance,
       stats: {
-        present: intern.attendance.filter(entry => entry.status === "Present").length,
-        absent: intern.attendance.filter(entry => entry.status === "Absent").length
-      }
+        present: combinedAttendance.filter(
+          (entry) => entry.status === "Present"
+        ).length,
+        absent: combinedAttendance.filter((entry) => entry.status === "Absent")
+          .length,
+      },
     };
-
 
     res.status(200).json(response); // Sending the structured response
   } catch (error) {
     console.error("Error fetching attendance data:", error);
-    res.status(500).json({ message: "Error fetching intern's attendance", error: error.message });
+    res
+      .status(500)
+      .json({
+        message: "Error fetching intern's attendance",
+        error: error.message,
+      });
   }
 };
-
 
 // const addAvailableDay = async (req, res) => {
 //   const { traineeId } = req.params;
@@ -468,7 +556,6 @@ const removeAvailableDay = async (req, res) => {
 //   }
 // };
 
-
 const uploadTXT = async (req, res) => {
   try {
     if (!req.file) {
@@ -476,33 +563,36 @@ const uploadTXT = async (req, res) => {
     }
 
     // Read and normalize line endings, remove BOM if present
-    let fileContent = fs.readFileSync(req.file.path, 'utf8')
-      .replace(/\uFEFF/g, '')           // remove BOM
-      .replace(/\r\n/g, '\n');          // unify Windows ↔ Unix
+    let fileContent = fs
+      .readFileSync(req.file.path, "utf8")
+      .replace(/\uFEFF/g, "") // remove BOM
+      .replace(/\r\n/g, "\n"); // unify Windows ↔ Unix
 
     // Split off header then non-empty rows
-    const rows = fileContent.split('\n')
+    const rows = fileContent
+      .split("\n")
       .slice(1)
-      .filter(line => line.trim().length > 0);
+      .filter((line) => line.trim().length > 0);
 
     // Map & trim
-    const updates = rows.map(row => {
-      const [rawId, rawEmail] = row.split('\t');
-      const Trainee_ID    = rawId   .trim();
+    const updates = rows.map((row) => {
+      const [rawId, rawEmail] = row.split("\t");
+      const Trainee_ID = rawId.trim();
       const Trainee_Email = rawEmail
-        .trim()                      // cut out whitespace
-        .replace(/^['"]+|['"]+$/g, '');  // strip surrounding quotes if any
+        .trim() // cut out whitespace
+        .replace(/^['"]+|['"]+$/g, ""); // strip surrounding quotes if any
 
       return { Trainee_ID, Trainee_Email };
     });
 
     for (const { Trainee_ID, Trainee_Email } of updates) {
       try {
-        const intern = await InternService.updateInternEmail(Trainee_ID, Trainee_Email);
+        const intern = await InternService.updateInternEmail(
+          Trainee_ID,
+          Trainee_Email
+        );
         if (intern) {
-          
         } else {
-          
         }
       } catch (err) {
         console.error(`❌ Error for ${Trainee_ID}: ${err.message}`);
@@ -512,10 +602,11 @@ const uploadTXT = async (req, res) => {
     res.status(200).json({ message: "Intern emails updated successfully!" });
   } catch (error) {
     console.error("❌ Error uploading file:", error);
-    res.status(500).json({ message: "Error processing file", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error processing file", error: error.message });
   }
 };
-
 
 module.exports = {
   addIntern,
@@ -545,8 +636,7 @@ module.exports = {
   uploadTXT,
   addAvailableDay,
   removeAvailableDay,
-  getInternByIdEach
+  getInternByIdEach,
   // getInternsByDay,
   // getInternsByDayCount
-
 };

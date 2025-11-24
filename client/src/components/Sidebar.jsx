@@ -1,4 +1,4 @@
-import React, { useState } from "react"; 
+import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   HomeIcon,
@@ -7,16 +7,17 @@ import {
   ChevronUpIcon,
   Plus,
   Users,
-  LayoutDashboard, 
-  User, 
-  UserPlus2, 
-  UserPlus2Icon, 
-  UserMinus,  // Replaced UserRoundMinus with UserMinus
-  PanelLeftClose, 
-  PanelLeftOpen, 
+  LayoutDashboard,
+  User,
+  UserPlus2,
+  UserPlus2Icon,
+  UserMinus, // Replaced UserRoundMinus with UserMinus
+  PanelLeftClose,
+  PanelLeftOpen,
   Upload,
   QrCodeIcon,
-  RefreshCcw
+  RefreshCcw,
+  Video,
 } from "lucide-react";
 
 const SidebarButton = ({
@@ -26,7 +27,7 @@ const SidebarButton = ({
   active,
   hasSubmenu,
   isOpen,
-  collapsed
+  collapsed,
 }) => (
   <button
     onClick={onClick}
@@ -38,13 +39,21 @@ const SidebarButton = ({
     }`}
   >
     <div className="flex items-center space-x-3">
-      <div className={`transform transition-transform duration-300 ${active ? 'scale-110' : ''}`}>
+      <div
+        className={`transform transition-transform duration-300 ${
+          active ? "scale-110" : ""
+        }`}
+      >
         {icon}
       </div>
       {!collapsed && <span className="font-medium">{label}</span>}
     </div>
     {hasSubmenu && !collapsed && (
-      <div className={`transform transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
+      <div
+        className={`transform transition-transform duration-300 ${
+          isOpen ? "rotate-180" : ""
+        }`}
+      >
         {isOpen ? (
           <ChevronUpIcon className="h-4 w-4" />
         ) : (
@@ -59,6 +68,7 @@ const Sidebar = () => {
   const [isInternMenuOpen, setIsInternMenuOpen] = useState(false);
   const [isGroupMenuOpen, setIsGroupMenuOpen] = useState(false);
   const [isProjectMenuOpen, setIsProjectMenuOpen] = useState(false);
+  const [isAttendanceMenuOpen, setIsAttendanceMenuOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -74,7 +84,11 @@ const Sidebar = () => {
   };
 
   return (
-    <div className={`${collapsed ? 'w-20' : 'w-64'}  bg-[#00102F] min-h-screen h-full flex flex-col shadow-xl sticky top-0 transition-all duration-300`}>
+    <div
+      className={`${
+        collapsed ? "w-20" : "w-64"
+      }  bg-[#00102F] min-h-screen h-full flex flex-col shadow-xl sticky top-0 transition-all duration-300`}
+    >
       {/* Logo/Header */}
       <div className="flex justify-center p-4 border-b border-gray-700/50 bg-black/20">
         <div className="relative group cursor-pointer my-4">
@@ -83,9 +97,9 @@ const Sidebar = () => {
       </div>
 
       {/* Toggle Button */}
-      <button 
+      <button
         onClick={toggleSidebar}
-        className="absolute right-0 top-20 transform translate-x-1/2 bg-green-600 text-white p-1.5 rounded-full shadow-lg hover:bg-green-700 transition-colors duration-300"
+        className="absolute right-0 top-20 transform translate-x-1/2 bg-green-600 text-white p-1.5 rounded-full shadow-lg hover:bg-green-700 transition-colors duration-300 z-10"
       >
         {collapsed ? (
           <PanelLeftOpen className="h-4 w-4" />
@@ -116,7 +130,11 @@ const Sidebar = () => {
           />
 
           {!collapsed && (
-            <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isInternMenuOpen ? 'max-h-48' : 'max-h-0'}`}>
+            <div
+              className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                isInternMenuOpen ? "max-h-48" : "max-h-0"
+              }`}
+            >
               <div className="ml-4 pl-4 border-l border-green-600/30 space-y-2 py-2">
                 <SidebarButton
                   icon={<User className="h-5 w-5" />}
@@ -164,7 +182,11 @@ const Sidebar = () => {
           />
 
           {!collapsed && (
-            <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isGroupMenuOpen ? 'max-h-32' : 'max-h-0'}`}>
+            <div
+              className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                isGroupMenuOpen ? "max-h-32" : "max-h-0"
+              }`}
+            >
               <div className="ml-4 pl-4 border-l border-green-600/30 space-y-2 py-2">
                 <SidebarButton
                   icon={<UserPlus2Icon className="h-5 w-5" />}
@@ -174,7 +196,7 @@ const Sidebar = () => {
                   collapsed={collapsed}
                 />
                 <SidebarButton
-                  icon={<UserMinus className="h-5 w-5" />}  // Replace UserRoundMinus with UserMinus
+                  icon={<UserMinus className="h-5 w-5" />} // Replace UserRoundMinus with UserMinus
                   label="Manage Teams"
                   onClick={() => handleNavigation("/teams")}
                   active={isActive("/teams")}
@@ -198,7 +220,11 @@ const Sidebar = () => {
           />
 
           {!collapsed && (
-            <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isProjectMenuOpen ? 'max-h-48' : 'max-h-0'}`}>
+            <div
+              className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                isProjectMenuOpen ? "max-h-48" : "max-h-0"
+              }`}
+            >
               <div className="ml-4 pl-4 border-l border-green-600/30 space-y-2 py-2">
                 <SidebarButton
                   icon={<Plus className="h-5 w-5" />}
@@ -219,24 +245,44 @@ const Sidebar = () => {
           )}
         </div>
 
-        {/* QR Code Generator */}
-        <SidebarButton
-          icon={<QrCodeIcon className="h-6 w-6" />}
-          label="QR Meeting Attendance"
-          onClick={() => handleNavigation("/qr-generator")}
-          active={isActive("/qr-generator")}
-          collapsed={collapsed}
-        />
+        {/* Attendance Management */}
+        <div className="space-y-2">
+          <SidebarButton
+            icon={<QrCodeIcon className="h-6 w-6" />}
+            label="Attendance"
+            onClick={() => setIsAttendanceMenuOpen(!isAttendanceMenuOpen)}
+            active={isActive("/qr-generator") || isActive("/online-attendance")}
+            hasSubmenu={true}
+            isOpen={isAttendanceMenuOpen}
+            collapsed={collapsed}
+          />
 
-        {/* Daily Attendance QR */}
-        <SidebarButton
-          icon={<RefreshCcw className="h-6 w-6" />}
-          label="Daily QR Attendance"
-          onClick={() => handleNavigation("/daily-attendance-qr")}
-          active={isActive("/daily-attendance-qr")}
-          collapsed={collapsed}
-        />
-      </div>      
+          {!collapsed && (
+            <div
+              className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                isAttendanceMenuOpen ? "max-h-32" : "max-h-0"
+              }`}
+            >
+              <div className="ml-4 pl-4 border-l border-green-600/30 space-y-2 py-2">
+                <SidebarButton
+                  icon={<QrCodeIcon className="h-5 w-5" />}
+                  label="QR Attendance"
+                  onClick={() => handleNavigation("/qr-generator")}
+                  active={isActive("/qr-generator")}
+                  collapsed={collapsed}
+                />
+                <SidebarButton
+                  icon={<Video className="h-5 w-5" />}
+                  label="Online Attendance"
+                  onClick={() => handleNavigation("/online-attendance")}
+                  active={isActive("/online-attendance")}
+                  collapsed={collapsed}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
