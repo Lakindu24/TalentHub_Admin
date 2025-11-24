@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { fetchInterns, fetchAttendanceStatsForToday, fetchAttendanceStatsByType } from "../api/internApi";
 import DashboardCard from "../components/DashboardCard";
-import Navbar from "../components/Navbar";
-import Sidebar from "../components/Sidebar";
+import Layout from "../components/Layout";
 import {
   Users,
   CheckCircle,
@@ -386,7 +385,7 @@ const Dashboard = () => {
         {/* Stats Cards */}
         <motion.div
           variants={containerVariants}
-          className="grid grid-cols-1 md:grid-cols-5 gap-6"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6"
         >
           <motion.div
             variants={combinedVariants}
@@ -452,23 +451,23 @@ const Dashboard = () => {
         {/* Enhanced Attendance Visualization */}
         <motion.div
           variants={itemVariants}
-          className="mt-12 grid grid-cols-1 lg:grid-cols-5 gap-6"
+          className="mt-8 md:mt-12 grid grid-cols-1 lg:grid-cols-5 gap-4 md:gap-6"
         >
           <motion.div
             whileHover={{ y: -2 }}
-            className="lg:col-span-3 bg-white shadow-lg rounded-2xl p-8 border border-gray-100"
+            className="lg:col-span-3 bg-white shadow-lg rounded-2xl p-4 md:p-8 border border-gray-100"
           >
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-semibold text-gray-800">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
+              <h3 className="text-xl md:text-2xl font-semibold text-gray-800">
                 Attendance Overview
               </h3>
-              <div className="flex items-center space-x-1 bg-gray-100 p-1 rounded-lg">
+              <div className="flex items-center space-x-1 bg-gray-100 p-1 rounded-lg w-full sm:w-auto overflow-x-auto">
                 {["daily", "meeting", "total"].map((tab) => (
                   <motion.button
                     key={tab}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setActiveTab(tab)}
-                    className={`px-3 py-1.5 text-sm font-medium rounded-md flex items-center gap-1.5 ${
+                    className={`px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md flex items-center gap-1.5 whitespace-nowrap ${
                       activeTab === tab
                         ? "bg-white shadow text-blue-600"
                         : "text-gray-600"
@@ -489,14 +488,12 @@ const Dashboard = () => {
 
             {/* Progress Bar */}
             <div className="mb-6">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-gray-700">
+              <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+                <span className="text-xs sm:text-sm font-medium text-gray-700">
                   Attendance Rate: {presentPercentage}%
                 </span>
-                <span className="text-sm font-medium text-gray-700">
-                                  <span className="text-sm text-gray-700">
+                <span className="text-xs sm:text-sm font-medium text-gray-700">
                   {activeData.present}/{totalInterns} Present
-                </span>
                 </span>
               </div>
               <div className="relative pt-2">
@@ -512,7 +509,7 @@ const Dashboard = () => {
             </div>
 
             {/* Enhanced Chart */}
-            <div className="h-64">
+            <div className="h-64 md:h-64">
               <Bar data={chartData} options={chartOptions} />
             </div>
           </motion.div>
@@ -520,9 +517,9 @@ const Dashboard = () => {
           {/* Redesigned Attendance Metrics section */}
           <motion.div
             whileHover={{ y: -2 }}
-            className="lg:col-span-2 bg-white shadow-lg rounded-2xl p-8 border border-gray-100"
+            className="lg:col-span-2 bg-white shadow-lg rounded-2xl p-4 md:p-8 border border-gray-100"
           >
-            <h3 className="text-2xl font-semibold text-gray-800 mb-6">
+            <h3 className="text-xl md:text-2xl font-semibold text-gray-800 mb-6">
               Attendance Insights
             </h3>
             <div className="space-y-6">
@@ -533,7 +530,7 @@ const Dashboard = () => {
               >
                 <div className="flex items-center text-blue-700 font-medium mb-2">
                   <TrendingUp size={16} className="mr-2" />
-                  <span>Recent Attendance Trend</span>
+                  <span className="text-sm">Recent Attendance Trend</span>
                 </div>
                 <p className="text-sm text-gray-700">
                   {presentPercentage > 75
@@ -614,16 +611,9 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
-      <Sidebar />
-      <div className="flex-1 flex flex-col">
-        <Navbar />
-        <div className="h-20"></div> {/* Spacing for fixed navbar */}
-        <main className="flex-1 p-6 sm:p-10 overflow-y-auto">
-          <AnimatePresence mode="wait">{renderContent()}</AnimatePresence>
-        </main>
-      </div>
-    </div>
+    <Layout>
+      <AnimatePresence mode="wait">{renderContent()}</AnimatePresence>
+    </Layout>
   );
 };
 

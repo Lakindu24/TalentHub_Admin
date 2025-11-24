@@ -21,10 +21,9 @@ import {
   User,
 } from "lucide-react";
 import * as XLSX from "xlsx";
-import Sidebar from "../components/Sidebar";
+import Layout from "../components/Layout";
 import { api, getAuthHeaders } from "../api/apiConfig";
 import { markAttendance } from "../api/internApi";
-import Navbar from "../components/Navbar";
 import logoURL from "../assets/slt logo.jpg";
 import ShareModal from "../components/ShareModal";
 import "../App.css";
@@ -501,16 +500,16 @@ const InternsPage = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row relative">
+    <Layout className="relative">
       {/* Full-page loading overlay during upload */}
       {uploading && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex flex-col items-center justify-center">
-          <div className="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full text-center">
+          <div className="bg-white p-6 md:p-8 rounded-xl shadow-2xl max-w-md w-full mx-4 text-center">
             <Loader2 className="animate-spin h-12 w-12 text-blue-500 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">
+            <h3 className="text-lg md:text-xl font-semibold text-gray-800 mb-2">
               Uploading File...
             </h3>
-            <p className="text-gray-600 mb-4">
+            <p className="text-sm md:text-base text-gray-600 mb-4">
               Please wait while we process your file. Do not refresh or close
               the page.
             </p>
@@ -525,15 +524,13 @@ const InternsPage = () => {
         </div>
       )}
 
-      <Navbar />
-      <Sidebar />
       <div
-        className={`flex-1 bg-gray-50 p-8 space-y-6 mt-24 ${
+        className={`space-y-4 md:space-y-6 ${
           uploading ? "opacity-50" : ""
         }`}
       >
         {/* Header Section */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 md:mb-6 gap-4">
           <div className="flex items-center gap-4">
             <motion.div
               initial={{ scale: 0 }}
@@ -915,7 +912,7 @@ const InternsPage = () => {
 
       {/* Toast notifications */}
       <Toaster position="top-right" />
-    </div>
+    </Layout>
   );
 };
 

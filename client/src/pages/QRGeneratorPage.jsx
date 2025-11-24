@@ -4,8 +4,7 @@ import logoURL from "../assets/slt logo.jpg";
 import "jspdf-autotable";
 import { api, getAuthHeaders } from "../api/apiConfig";
 import { toast, Toaster } from "react-hot-toast";
-import Navbar from "../components/Navbar";
-import Sidebar from "../components/Sidebar";
+import Layout from "../components/Layout";
 import { Dialog } from "@headlessui/react";
 import {
   Clock,
@@ -245,19 +244,10 @@ const QRGeneratorPage = () => {
   console.log("Component render - filteredLogs for display:", filteredLogs);
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <Sidebar />
-      <div className="flex-1 flex flex-col">
-        <div className="sticky top-0 z-10 bg-white shadow-sm">
-          <Navbar />
-        </div>
-        <Toaster position="top-right" />
-
-        <div className="h-20" />
-
-        <main className="flex-1 p-6 md:p-8 lg:p-10 overflow-y-auto">
-          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
-            <div className="flex items-center gap-4 mt-5">
+    <Layout>
+      <Toaster position="top-right" />
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6 md:mb-8">
+        <div className="flex items-center gap-4">
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
@@ -269,14 +259,14 @@ const QRGeneratorPage = () => {
                 }}
                 className="p-4 rounded-2xl"
               >
-                <QrCodeIcon className="h-10 w-auto text-4xl text-green-600" />
+                <QrCodeIcon className="h-8 w-8 sm:h-10 sm:w-10 text-green-600" />
               </motion.div>
               <div>
                 <motion.h1
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.5, delay: 0.3 }}
-                  className="text-3xl font-bold text-[#060B27]"
+                  className="text-2xl sm:text-3xl font-bold text-[#060B27]"
                 >
                   QR Code Meeting Attendance
                 </motion.h1>
@@ -284,25 +274,24 @@ const QRGeneratorPage = () => {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.5, delay: 0.4 }}
-                  className="text-gray-500"
+                  className="text-sm sm:text-base text-gray-500"
                 >
                   Generate meeting QR codes and monitor all QR-based attendance
                 </motion.p>
               </div>
             </div>
 
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 w-full sm:w-auto">
               <input
                 type="text"
-                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 w-full"
                 placeholder="Enter Meeting Title"
                 value={meetingTitle}
                 onChange={e => setMeetingTitle(e.target.value)}
                 disabled={isLoading}
-                style={{ minWidth: 220 }}
               />
               <button
-                className={`flex items-center justify-center gap-2 bg-blue-300 px-6 py-2.5 text-black rounded-lg hover:bg-blue-700 hover:text-white transition-colors shadow-sm ${
+                className={`flex items-center justify-center gap-2 bg-blue-300 px-6 py-2.5 text-black rounded-lg hover:bg-blue-700 hover:text-white transition-colors shadow-sm w-full ${
                   isLoading ? "opacity-70 cursor-not-allowed" : ""
                 }`}
                 onClick={async () => {
@@ -325,23 +314,23 @@ const QRGeneratorPage = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
+            <div className="bg-white rounded-xl shadow-sm p-4 md:p-6 border border-gray-100">
               <div className="flex items-center justify-between">
-                <h3 className="text-gray-500 text-sm font-medium">
+                <h3 className="text-gray-500 text-xs sm:text-sm font-medium">
                   Total Meeting Scans Today
                 </h3>
                 <span className="p-2 bg-blue-50 rounded-lg">
-                  <User className="h-5 w-5 text-blue-500" />
+                  <User className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
                 </span>
               </div>
-              <p className="text-2xl font-bold mt-2">{attendanceLogs.length}</p>
+              <p className="text-xl sm:text-2xl font-bold mt-2">{attendanceLogs.length}</p>
               <p className="text-xs text-gray-500 mt-1">Updated in real-time</p>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <div className="bg-white rounded-xl shadow-sm p-4 md:p-6 border border-gray-100">
               <div className="flex items-center justify-between">
-                <h3 className="text-gray-500 text-sm font-medium">
+                <h3 className="text-gray-500 text-xs sm:text-sm font-medium">
                   QR Code Status
                 </h3>
                 <span
@@ -350,13 +339,13 @@ const QRGeneratorPage = () => {
                   } rounded-lg`}
                 >
                   {qrCode && !isExpired ? (
-                    <Check className="h-5 w-5 text-green-500" />
+                    <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
                   ) : (
-                    <X className="h-5 w-5 text-red-500" />
+                    <X className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
                   )}
                 </span>
               </div>
-              <p className="text-lg font-semibold mt-2">
+              <p className="text-base sm:text-lg font-semibold mt-2">
                 {qrCode && !isExpired ? (
                   <span className="text-green-600">Active</span>
                 ) : (
@@ -370,16 +359,16 @@ const QRGeneratorPage = () => {
               </p>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <div className="bg-white rounded-xl shadow-sm p-4 md:p-6 border border-gray-100">
               <div className="flex items-center justify-between">
-                <h3 className="text-gray-500 text-sm font-medium">
+                <h3 className="text-gray-500 text-xs sm:text-sm font-medium">
                   Current Time
                 </h3>
                 <span className="p-2 bg-purple-50 rounded-lg">
-                  <Clock className="h-5 w-5 text-purple-500" />
+                  <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" />
                 </span>
               </div>
-              <p className="text-lg font-semibold mt-2" id="current-time">
+              <p className="text-base sm:text-lg font-semibold mt-2" id="current-time">
                 {new Date().toLocaleTimeString()}
               </p>
               <p className="text-xs text-gray-500 mt-1">
@@ -668,9 +657,7 @@ const QRGeneratorPage = () => {
               </div>
             )}
           </div>
-        </main>
-      </div>
-    </div>
+    </Layout>
   );
 };
 

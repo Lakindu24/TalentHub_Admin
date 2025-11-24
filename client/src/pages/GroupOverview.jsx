@@ -13,8 +13,7 @@ import {
 } from 'lucide-react';
 import { UserGroupIcon } from "@heroicons/react/outline";
 import { Toaster, toast } from "react-hot-toast";
-import Sidebar from "../components/Sidebar";
-import Navbar from "../components/Navbar";
+import Layout from "../components/Layout";
 import { motion, AnimatePresence } from "framer-motion"; 
 
 // Animation variants for list items
@@ -430,24 +429,20 @@ const GroupOverview = () => {
   );
 
   return (
-    <div className="flex min-h-screen bg-[#f8fafc]">
-      <Sidebar />
-      <div className="flex-1">
-        <Navbar />
-        <motion.main 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+    <Layout className="bg-[#f8fafc]">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="max-w-7xl mx-auto px-4 sm:px-6 py-8 mt-24"
+          className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 md:mb-8 gap-4"
         >
-          <motion.div 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="flex items-center justify-between mb-8"
-          >
-            {/* Title Section */}
-            <div className="flex items-center gap-4">
+          {/* Title Section */}
+          <div className="flex items-center gap-4">
               <motion.div 
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
@@ -485,7 +480,7 @@ const GroupOverview = () => {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.5 }}
-              className="relative w-64"
+              className="relative w-full sm:w-64"
             >
               <Search className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
               <motion.input
@@ -549,7 +544,6 @@ const GroupOverview = () => {
               </AnimatePresence>
             </motion.div>
           )}
-        </motion.main>
 
         <AddMemberModal
           isOpen={modalOpen}
@@ -561,8 +555,8 @@ const GroupOverview = () => {
 
         {/* React Hot Toast Toaster */}
         <Toaster position="bottom-right" />
-      </div>
-    </div>
+      </motion.div>
+    </Layout>
   );
 };
 

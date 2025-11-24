@@ -28,7 +28,6 @@ import DailyAttendanceQR from "../pages/DailyAttendanceQR";
 
 const AppRoutes = () => {
   return (
-    <Router>
       <Routes>
         <Route
           path="/"
@@ -59,7 +58,6 @@ const AppRoutes = () => {
         <Route path="/attendancesummary" element={<AttendanceSummaryPage />} />
         <Route path="/daily-attendance-qr" element={<DailyAttendanceQR />} />
       </Routes>
-    </Router>
   );
 };
 
