@@ -8,6 +8,9 @@ import { motion } from "framer-motion";
 import AttendanceContent from "./OnlineAttendanceContent";
 
 const OnlineAttendancePage = () => {
+  // Add mobile menu state
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+
   const [attendanceRecords, setAttendanceRecords] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDate, setSelectedDate] = useState(
@@ -381,7 +384,6 @@ Mike Johnson_9012,Left,10/14/25 11:20:00 PM`;
           meetingName: manualForm.meetingName,
           status: manualForm.status,
           date: manualForm.date,
-          // timeMarked is now set by backend automatically
         },
         getAuthHeaders()
       );
@@ -395,7 +397,6 @@ Mike Johnson_9012,Left,10/14/25 11:20:00 PM`;
           }
         );
 
-        // Reset form
         setManualForm({
           internId: "",
           meetingName: "",
@@ -423,10 +424,13 @@ Mike Johnson_9012,Left,10/14/25 11:20:00 PM`;
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <Sidebar />
+      {/* Pass mobile menu props to Sidebar */}
+      <Sidebar isMobileOpen={isMobileOpen} setIsMobileOpen={setIsMobileOpen} />
+
       <div className="flex-1 flex flex-col">
         <div className="sticky top-0 z-10 bg-white shadow-sm">
-          <Navbar />
+          {/* Pass menu toggle handler to Navbar */}
+          <Navbar onMenuClick={() => setIsMobileOpen(!isMobileOpen)} />
         </div>
         <Toaster position="top-right" />
 
