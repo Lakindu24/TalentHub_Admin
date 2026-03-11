@@ -108,6 +108,8 @@ const QRGeneratorPage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [expiresAt, setExpiresAt] = useState(null);
+  const [timeLeft, setTimeLeft] = useState(null);
 
   const fetchQRCode = async () => {
     if (!meetingTitle.trim()) {
@@ -125,6 +127,7 @@ const QRGeneratorPage = () => {
       );
       if (response.data.qrCode) {
         setQrCode(response.data.qrCode);
+        setExpiresAt(response.data.expiresAt);
         setDisplayMeetingTitle(meetingTitle);
         setIsExpired(false); // QR Code is now active
         toast.success("QR Code generated successfully!", {
@@ -224,6 +227,28 @@ const QRGeneratorPage = () => {
     const interval = setInterval(fetchAttendanceLogs, 3000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+  if (!expiresAt) return;
+
+  const interval = setInterval(() => {
+    const remaining = expiresAt - Date.now();
+
+    if (remaining <= 0) {
+      setTimeLeft("Expired");
+      setIsExpired(true);
+      clearInterval(interval);
+      return;
+    }
+
+    const minutes = Math.floor(remaining / 60000);
+    const seconds = Math.floor((remaining % 60000) / 1000);
+
+    setTimeLeft(`${minutes}:${seconds.toString().padStart(2, "0")}`);
+  }, 1000);
+
+  return () => clearInterval(interval);
+}, [expiresAt]);
 
   // Filter logs based on search term
   const filteredLogs = attendanceLogs.filter(
@@ -416,6 +441,13 @@ const QRGeneratorPage = () => {
                         <Calendar className="h-4 w-4" />
                         <p className="text-sm">{new Date().toDateString()}</p>
                       </div>
+
+                      {timeLeft && (
+                        <div className="mt-2 text-sm text-red-600 font-semibold text-center">
+                          QR expires in: {timeLeft}
+                        </div>
+                      )}
+
                       {displayMeetingTitle && (
                         <div className="mt-2 text-center">
                           <span className="font-semibold text-blue-700">Meeting:</span> <span className="text-gray-800">{displayMeetingTitle}</span>

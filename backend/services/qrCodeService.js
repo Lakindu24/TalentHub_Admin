@@ -30,7 +30,7 @@ const generateMeetingQR = async (meetingTitle = "") => {
     type: 'meeting_attendance',
     meetingTitle,
     generatedAt: currentTime,
-    expiresAt: currentTime + (10 * 60 * 1000), // 10 minutes
+    expiresAt: currentTime + (30 * 60 * 1000), // 30 minutes
     usedBy: [] // Track which interns have used this QR
   };
   // Store in memory (in production, use Redis or database)
