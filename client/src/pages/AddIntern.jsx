@@ -18,10 +18,11 @@ const AddIntern = () => {
         const response = await api.get("/interns", getAuthHeaders());
         const fetchedInterns = response.data || [];
         const uniqueSpecializations = Array.from(
-          new Set(fetchedInterns.map((intern) => intern.field_of_spec_name).filter(Boolean))
+          new Set(fetchedInterns.map((intern) => intern.field_of_spec_name || intern.fieldOfSpecName || intern.fieldOfSpecialization).filter(Boolean))
         ).sort();
         setSpecializations(uniqueSpecializations);
-      } catch (error) {
+      } 
+      catch (error) {
         console.error("Error fetching specializations:", error);
         toast.error("Failed to load specializations.");
       }
@@ -98,7 +99,7 @@ const AddIntern = () => {
                     </div>
                     <input
                       type="text"
-                      value={traineeId}
+                      value={Trainee_ID}
                       onChange={(e) => setTraineeId(e.target.value)}
                       className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:outline-none sm:text-sm bg-white transition-all duration-200"
                       required
@@ -118,7 +119,7 @@ const AddIntern = () => {
                     </div>
                     <input
                       type="text"
-                      value={traineeName}
+                      value={Trainee_Name}
                       onChange={(e) => setTraineeName(e.target.value)}
                       className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:outline-none sm:text-sm bg-white transition-all duration-200"
                       required
@@ -137,7 +138,7 @@ const AddIntern = () => {
                       <Briefcase className="text-gray-400" size={18} />
                     </div>
                     <select
-                      value={fieldOfSpecialization}
+                      value={field_of_spec_name}
                       onChange={(e) => setFieldOfSpecialization(e.target.value)}
                       className="block w-full pl-10 pr-10 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:outline-none sm:text-sm bg-white appearance-none cursor-pointer transition-all duration-200"
                       required
