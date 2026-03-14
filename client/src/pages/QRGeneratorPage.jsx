@@ -370,13 +370,22 @@ const QRGeneratorPage = () => {
                   )}
                 </span>
               </div>
-              <p className="text-base sm:text-lg font-semibold mt-2">
+              <div className="flex items-center gap-3 mt-2">
                 {qrCode && !isExpired ? (
-                  <span className="text-green-600">Active</span>
+                  <>
+                    <span className="text-green-600 font-semibold">Active</span>
+
+                    <button
+                      onClick={() => setModalOpen(true)}
+                      className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition"
+                    >
+                      Open QR
+                    </button>
+                  </>
                 ) : (
-                  <span className="text-red-600">Inactive</span>
+                  <span className="text-red-600 font-semibold">Inactive</span>
                 )}
-              </p>
+              </div>
               <p className="text-xs text-gray-500 mt-1">
                 {qrCode && !isExpired
                   ? "QR code is ready for scanning"
@@ -458,11 +467,26 @@ const QRGeneratorPage = () => {
                         to mark their presence
                       </p>
                       <div className="flex gap-3 mt-6 w-full">
-                        <button className="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg text-sm hover:bg-indigo-100 transition-colors">
+                        <button
+                          className="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg text-sm hover:bg-indigo-100 transition-colors"
+                          onClick={() => {
+                            if (!qrCode) return;
+
+                            const link = document.createElement("a");
+                            link.href = qrCode;
+                            link.download = `meeting_qr_${new Date().toISOString().slice(0,10)}.png`;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                          }}
+                        >
                           <Download size={16} />
                           Save
                         </button>
-                        <button className="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg text-sm hover:bg-indigo-100 transition-colors">
+                        <button
+                          className="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg text-sm hover:bg-indigo-100 transition-colors"
+                          onClick={fetchQRCode}
+                        >
                           <RefreshCw size={16} />
                           Refresh
                         </button>
