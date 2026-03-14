@@ -61,11 +61,11 @@ const WeekOverview = () => {
 
       const sortedAttendedInterns = allInterns
         .filter((intern) => intern.attendance.length > 0) // At least one attendance record
-        .sort((a, b) => a.traineeId.localeCompare(b.traineeId));
+        .sort((a, b) => (a.traineeId || "").localeCompare(b.traineeId || ""));
 
       const sortedNotAttendedInterns = allInterns
         .filter((intern) => intern.attendance.length === 0) // No attendance records
-        .sort((a, b) => a.traineeId.localeCompare(b.traineeId));
+        .sort((a, b) => (a.traineeId || "").localeCompare(b.traineeId || ""));
 
       setAttendedInterns(sortedAttendedInterns);
       setNotAttendedInterns(sortedNotAttendedInterns);
