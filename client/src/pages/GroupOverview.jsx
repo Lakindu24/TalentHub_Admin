@@ -160,11 +160,11 @@ const TeamCard = ({ team, onAddMember, onRemoveMember, onDeleteTeam, onUpdateTea
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-[#060B27]">{member.traineeName}</p>
+                      <p className="font-medium text-[#060B27]">{member.traineeName || member.Trainee_Name || "Unknown"}</p>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="text-sm text-gray-500">{member.traineeId}</span>
+                        <span className="text-sm text-gray-500">{member.traineeId || member.Trainee_ID || "-"}</span>
                         <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                        <span className="text-sm text-gray-500">{member.fieldOfSpecialization}</span>
+                        <span className="text-sm text-gray-500">{member.fieldOfSpecialization || member.field_of_spec_name || "-"}</span>
                       </div>
                     </div>
                     <motion.button
@@ -191,8 +191,8 @@ const AddMemberModal = ({ isOpen, onClose, teamName, availableInterns, onAddInte
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredInterns = availableInterns.filter(intern =>
-    intern.traineeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    intern.traineeId.toLowerCase().includes(searchTerm.toLowerCase())
+    (intern.traineeName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (intern.traineeId || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Modal animation
@@ -277,7 +277,7 @@ const AddMemberModal = ({ isOpen, onClose, teamName, availableInterns, onAddInte
                           <div className="flex items-center gap-2 mt-1">
                             <span className="text-sm text-gray-500">{intern.traineeId}</span>
                             <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                            <span className="text-sm text-gray-500">{intern.fieldOfSpecialization}</span>
+                            <span className="text-sm text-gray-500">{intern.fieldOfSpecialization || "-"}</span>
                           </div>
                         </div>
                         <motion.button
